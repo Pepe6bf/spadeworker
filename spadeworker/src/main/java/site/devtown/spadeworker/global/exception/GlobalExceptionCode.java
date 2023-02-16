@@ -1,4 +1,4 @@
-package site.devtown.spadeworker.global.error;
+package site.devtown.spadeworker.global.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

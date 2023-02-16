@@ -1,4 +1,4 @@
-package site.devtown.spadeworker.global.error;
+package site.devtown.spadeworker.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.persistence.EntityNotFoundException;
 
-import static site.devtown.spadeworker.global.error.GlobalExceptionCode.*;
+import static site.devtown.spadeworker.global.exception.GlobalExceptionCode.*;
 
 @Slf4j
 @RestControllerAdvice
