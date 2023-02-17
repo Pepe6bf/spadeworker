@@ -220,4 +220,10 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+### JWT ###
+src/main/resources/jwt.yml
+
+### yml ###
+src/main/resources/application-dev.yml
+
 # End of https://www.toptal.com/developers/gitignore/api/java,gradle,intellij+all,visualstudiocode,macos,windows
