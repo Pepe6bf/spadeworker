@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class ExceptionResponse {
 
     private String message;
-    private int status;
+    private Integer status;
     private String code;
     private List<FieldError> errors;
     private LocalDateTime timestamp;
@@ -24,7 +24,7 @@ public class ExceptionResponse {
             final ExceptionCode exceptionCode
     ) {
         this.message = exceptionCode.getMessage();
-        this.status = exceptionCode.getStatus();
+        this.status = exceptionCode.getHttpStatus().value();
         this.code = exceptionCode.getCode();
         this.timestamp = LocalDateTime.now();
         this.errors = new ArrayList<>();
@@ -35,7 +35,7 @@ public class ExceptionResponse {
             final String message
     ) {
         this.message = message;
-        this.status = exceptionCode.getStatus();
+        this.status = exceptionCode.getHttpStatus().value();
         this.code = exceptionCode.getCode();
         this.timestamp = LocalDateTime.now();
         this.errors = new ArrayList<>();
@@ -46,7 +46,7 @@ public class ExceptionResponse {
             final List<FieldError> errors
     ) {
         this.message = exceptionCode.getMessage();
-        this.status = exceptionCode.getStatus();
+        this.status = exceptionCode.getHttpStatus().value();
         this.code = exceptionCode.getCode();
         this.timestamp = LocalDateTime.now();
         this.errors = errors;
