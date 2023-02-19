@@ -70,4 +70,56 @@ public class AuthToken {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
+
+    /**
+     * Token Claim 조회
+     */
+    public Claims getTokenClaims() {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(tokenValue)
+                    .getBody();
+        } catch (SecurityException e) {
+            log.info("Invalid JWT signature.");
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT token.");
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT token.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT token compact of handler are invalid.");
+        }
+        return null;
+    }
+
+    /**
+     * Access Token 이 만료될 경우, 재발급을 위해 만료된 토큰을 조회.
+     */
+    public Claims getExpiredTokenClaims() {
+        try {
+            getTokenClaims();
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
+            return e.getClaims();
+        }
+        return null;
+    }
+
+    /**
+     * 토큰 유효성 검증
+     */
+    public boolean validate() {
+        try {
+            return this.getTokenClaims() != null;
+        } catch (ExpiredJwtException e) {
+            log.error("만료된 토큰입니다.");
+            throw e;
+        } catch (Exception e) {
+            log.error("유효하지 않은 토큰입니다.");
+            throw new JwtException("유효하지 않은 토큰입니다.");
+        }
+    }
 }
