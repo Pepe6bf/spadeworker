@@ -36,4 +36,11 @@ public class UserRefreshToken extends BaseTimeEntity {
     ) {
         return new UserRefreshToken(personalId, tokenValue);
     }
+
+    /**
+     * token value 변경
+     */
+    public void changeTokenValue(String tokenValue) {
+        this.tokenValue = tokenValue;
+    }
 }
