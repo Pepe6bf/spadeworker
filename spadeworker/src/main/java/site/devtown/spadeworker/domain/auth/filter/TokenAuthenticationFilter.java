@@ -1,0 +1,41 @@
+package site.devtown.spadeworker.domain.auth.filter;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+import site.devtown.spadeworker.domain.auth.token.AuthToken;
+import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
+import site.devtown.spadeworker.global.util.HeaderUtil;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Slf4j
+@RequiredArgsConstructor
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
+    private final AuthTokenProvider tokenProvider;
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
+        String tokenValue = HeaderUtil.getAccessToken(request);
+        AuthToken token = tokenProvider.convertAccessToken(tokenValue);
+
+        // 토큰 검증
+        if (token.validate()) {
+            Authentication authentication = tokenProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
