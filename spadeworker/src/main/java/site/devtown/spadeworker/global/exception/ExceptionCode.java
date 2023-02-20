@@ -1,8 +1,10 @@
 package site.devtown.spadeworker.global.exception;
 
+import org.springframework.http.HttpStatus;
+
 public interface ExceptionCode {
 
-    int getStatus();
+    HttpStatus getHttpStatus();
 
     String getCode();
 

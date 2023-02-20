@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.BindingResult;
+import site.devtown.spadeworker.global.util.GsonUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class ExceptionResponse {
 
     private String message;
-    private int status;
+    private Integer status;
     private String code;
     private List<FieldError> errors;
     private LocalDateTime timestamp;
@@ -24,7 +25,7 @@ public class ExceptionResponse {
             final ExceptionCode exceptionCode
     ) {
         this.message = exceptionCode.getMessage();
-        this.status = exceptionCode.getStatus();
+        this.status = exceptionCode.getHttpStatus().value();
         this.code = exceptionCode.getCode();
         this.timestamp = LocalDateTime.now();
         this.errors = new ArrayList<>();
@@ -35,7 +36,7 @@ public class ExceptionResponse {
             final String message
     ) {
         this.message = message;
-        this.status = exceptionCode.getStatus();
+        this.status = exceptionCode.getHttpStatus().value();
         this.code = exceptionCode.getCode();
         this.timestamp = LocalDateTime.now();
         this.errors = new ArrayList<>();
@@ -46,7 +47,7 @@ public class ExceptionResponse {
             final List<FieldError> errors
     ) {
         this.message = exceptionCode.getMessage();
-        this.status = exceptionCode.getStatus();
+        this.status = exceptionCode.getHttpStatus().value();
         this.code = exceptionCode.getCode();
         this.timestamp = LocalDateTime.now();
         this.errors = errors;
@@ -77,6 +78,13 @@ public class ExceptionResponse {
             final List<FieldError> errors
     ) {
         return new ExceptionResponse(exceptionCode, errors);
+    }
+
+    /**
+     * Object -> Json (필터에서 사용)
+     */
+    public String convertJson() {
+        return new GsonUtil().toJson(this);
     }
 
     @Getter

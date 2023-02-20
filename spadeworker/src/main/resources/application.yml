@@ -1,0 +1,43 @@
+server:
+  port:
+
+spring:
+  profiles:
+    default: dev
+
+  datasource:
+    url:
+    username:
+    password:
+    driver-class-name:
+
+  jpa:
+    hibernate.ddl-auto:
+    open-in-view:
+    show-sql:
+    properties:
+      hibernate.format_sql:
+      hibernate.default_batch_fetch_size:
+
+  # OAuth Config
+  security:
+    oauth2.client:
+      registration:
+        google:
+          clientId:
+          clientSecret:
+          scope:
+        kakao:
+          clientId:
+          clientAuthenticationMethod:
+          authorizationGrantType:
+          redirectUri:
+          scope:
+          clientName:
+      # Kakao Provider 설정
+      provider:
+        kakao:
+          authorizationUri:
+          tokenUri:
+          userInfoUri:
+          userNameAttribute:
