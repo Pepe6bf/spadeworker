@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.BindingResult;
+import site.devtown.spadeworker.global.util.GsonUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -77,6 +78,13 @@ public class ExceptionResponse {
             final List<FieldError> errors
     ) {
         return new ExceptionResponse(exceptionCode, errors);
+    }
+
+    /**
+     * Object -> Json (필터에서 사용)
+     */
+    public String convertJson() {
+        return new GsonUtil().toJson(this);
     }
 
     @Getter
