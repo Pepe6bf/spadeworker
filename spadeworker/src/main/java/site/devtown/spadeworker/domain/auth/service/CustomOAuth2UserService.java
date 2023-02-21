@@ -3,7 +3,6 @@ package site.devtown.spadeworker.domain.auth.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -47,8 +46,6 @@ public class CustomOAuth2UserService
         OAuth2User user = super.loadUser(userRequest);
         try {
             return this.process(userRequest, user);
-        } catch (AuthenticationException e) {
-            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new InternalAuthenticationServiceException(e.getMessage(), e.getCause());

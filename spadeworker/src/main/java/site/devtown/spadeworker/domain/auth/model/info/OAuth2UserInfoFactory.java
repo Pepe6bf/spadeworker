@@ -4,7 +4,6 @@ import site.devtown.spadeworker.domain.user.model.constant.AuthProviderType;
 
 import java.util.Map;
 
-
 public class OAuth2UserInfoFactory {
     public static OAuth2UserInfo getOAuth2UserInfo(
             AuthProviderType providerType,
