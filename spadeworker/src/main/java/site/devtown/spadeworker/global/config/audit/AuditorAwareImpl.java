@@ -15,10 +15,9 @@ public class AuditorAwareImpl
     @Override
     public Optional<String> getCurrentAuditor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userPersonalId = authentication.getName();
 
         return Optional.of(
-                (userPersonalId != null) ? userPersonalId : ""
+                (authentication != null) ? authentication.getName() : ""
         );
     }
 }
