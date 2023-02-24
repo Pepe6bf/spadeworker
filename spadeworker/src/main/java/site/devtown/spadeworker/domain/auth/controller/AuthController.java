@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
+import site.devtown.spadeworker.global.response.CommonResult;
 import site.devtown.spadeworker.global.response.ResponseService;
 import site.devtown.spadeworker.global.response.SingleResult;
 import site.devtown.spadeworker.global.util.CookieUtil;
@@ -42,8 +43,6 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        System.out.println("Auth Controller 도착!!!!!");
-
         // access token 확인
         String accessToken = HeaderUtil.getAccessToken(request);
         // refresh token 확인
@@ -66,6 +65,21 @@ public class AuthController {
                 OK.value(),
                 "재발급되었습니다.",
                 newTokens.get("accessToken")
+        );
+    }
+
+    @GetMapping("/logout")
+    public CommonResult logout(
+            HttpServletRequest request
+    ) {
+        // 쿠키에 Refresh Token 삭제
+        jwtService.deleteRefreshToken(
+                HeaderUtil.getAccessToken(request)
+        );
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "로그아웃 되었습니다."
         );
     }
 }

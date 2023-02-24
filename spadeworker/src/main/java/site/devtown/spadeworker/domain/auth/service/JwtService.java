@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.INVALID_REFRESH_TOKEN;
-import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.INVALID_TOKEN;
 
 @RequiredArgsConstructor
 @Service
@@ -64,6 +63,18 @@ public class JwtService {
                 "accessToken", newAccessToken.getTokenValue(),
                 "refreshToken", newRefreshToken.getTokenValue()
         );
+    }
+
+    /**
+     * 로그아웃 구현을 위해 리프레쉬 토큰 제거
+     */
+    @Transactional
+    public void deleteRefreshToken(String accessToken) {
+        AuthToken accessAuthToken = tokenProvider.convertAccessToken(accessToken);
+        String userPersonalId = accessAuthToken.getTokenClaims().getSubject();
+
+        // refresh token 삭제
+        userRefreshTokenRepository.deleteAllByPersonalId(userPersonalId);
     }
 
     private Claims getTokenClaims(AuthToken token) {
