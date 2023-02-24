@@ -47,6 +47,20 @@ public class AuthExceptionHandler {
     }
 
     /**
+     * TokenValidFailedException 예외 핸들링
+     */
+    @ExceptionHandler(TokenValidFailedException.class)
+    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+            TokenValidFailedException e
+    ) {
+        log.error("handle TokenValidFailedException");
+        return new ResponseEntity<>(
+                ExceptionResponse.of(INVALID_TOKEN, e.getMessage()),
+                HttpStatus.valueOf(INVALID_TOKEN.getHttpStatus().value())
+        );
+    }
+
+    /**
      * ExpiredJwtException 예외 핸들링
      */
     @ExceptionHandler(ExpiredJwtException.class)
@@ -57,6 +71,20 @@ public class AuthExceptionHandler {
         return new ResponseEntity<>(
                 ExceptionResponse.of(EXPIRED_TOKEN, EXPIRED_TOKEN.getMessage()),
                 HttpStatus.valueOf(EXPIRED_TOKEN.getHttpStatus().value())
+        );
+    }
+
+    /**
+     * NotExpiredTokenException
+     */
+    @ExceptionHandler(NotExpiredTokenException.class)
+    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+            NotExpiredTokenException e
+    ) {
+        log.error("handle NotExpiredTokenException");
+        return new ResponseEntity<>(
+                ExceptionResponse.of(NOT_EXPIRED_TOKEN, NOT_EXPIRED_TOKEN.getMessage()),
+                HttpStatus.valueOf(NOT_EXPIRED_TOKEN.getHttpStatus().value())
         );
     }
 
@@ -99,6 +127,20 @@ public class AuthExceptionHandler {
         return new ResponseEntity<>(
                 ExceptionResponse.of(INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION, INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION.getMessage()),
                 HttpStatus.valueOf(INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION.getHttpStatus().value())
+        );
+    }
+
+    /**
+     * ExpiredTokenException 예외 핸들링
+     */
+    @ExceptionHandler(ExpiredTokenException.class)
+    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+            ExpiredTokenException e
+    ) {
+        log.error("handle ExpiredTokenException");
+        return new ResponseEntity<>(
+                ExceptionResponse.of(EXPIRED_TOKEN, e.getMessage()),
+                HttpStatus.valueOf(EXPIRED_TOKEN.getHttpStatus().value())
         );
     }
 

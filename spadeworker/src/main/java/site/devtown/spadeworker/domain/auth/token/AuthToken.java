@@ -3,11 +3,14 @@ package site.devtown.spadeworker.domain.auth.token;
 import io.jsonwebtoken.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import site.devtown.spadeworker.domain.auth.exception.TokenValidFailedException;
 import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+
+import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.*;
 
 @Slf4j
 public class AuthToken {
@@ -89,7 +92,6 @@ public class AuthToken {
         try {
             getTokenClaims();
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT token.");
             return e.getClaims();
         }
         return null;
@@ -106,7 +108,7 @@ public class AuthToken {
             throw e;
         } catch (Exception e) {
             log.error("유효하지 않은 토큰입니다.");
-            throw new JwtException("유효하지 않은 토큰입니다.");
+            throw new TokenValidFailedException(INVALID_TOKEN.getMessage());
         }
     }
 }
