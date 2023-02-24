@@ -17,7 +17,8 @@ import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationFailureH
 import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationSuccessHandler;
 import site.devtown.spadeworker.domain.auth.handler.TokenAccessDeniedHandler;
 import site.devtown.spadeworker.domain.auth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
+
+import static org.springframework.http.HttpMethod.GET;
 
 @RequiredArgsConstructor
 @Configuration
@@ -57,6 +58,7 @@ public class SecurityConfig {
         http
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                .antMatchers(GET, "/api/auth/refresh").permitAll()
                 // 나머지는 모두 인증 필요
                 .anyRequest().authenticated();
 
