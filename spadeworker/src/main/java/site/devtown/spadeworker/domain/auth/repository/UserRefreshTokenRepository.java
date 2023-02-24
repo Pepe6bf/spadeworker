@@ -11,4 +11,6 @@ public interface UserRefreshTokenRepository
     Optional<UserRefreshToken> findByPersonalId(String personalId);
 
     Optional<UserRefreshToken> findByPersonalIdAndTokenValue(String personalId, String token);
+
+    void deleteAllByPersonalId(String personalId);
 }
