@@ -72,7 +72,7 @@ public class SecurityConfig {
         // front 에서 login 시 요청할 url
         http.oauth2Login()
                 .authorizationEndpoint()
-                .baseUri("/oauth2/authorization")
+                .baseUri("/api/oauth2/authorization")
                 .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository);
 
         // OAuth Server 리다이렉션 주소
