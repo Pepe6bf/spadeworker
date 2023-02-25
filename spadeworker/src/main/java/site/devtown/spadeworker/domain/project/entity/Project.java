@@ -23,23 +23,23 @@ public class Project extends BaseEntity {
     private String description;
 
     @Column(length = 1000, nullable = false)
-    private String thumbnailUrl = "PROJECT_DEFAULT_URL";
+    private String thumbnailImageUri = "PROJECT_DEFAULT_URI";
 
     private Project(
             String title,
             String description,
-            String thumbnailUrl
+            String thumbnailImageUri
     ) {
         this.title = title;
         this.description = description;
-        this.thumbnailUrl = thumbnailUrl;
+        this.thumbnailImageUri = thumbnailImageUri;
     }
 
     public static Project of(
             String title,
             String description,
-            String thumbnailUrl
+            String thumbnailImageUri
     ) {
-        return new Project(title, description, thumbnailUrl);
+        return new Project(title, description, thumbnailImageUri);
     }
 }
