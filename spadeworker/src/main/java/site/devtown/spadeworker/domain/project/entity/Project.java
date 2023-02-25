@@ -3,6 +3,7 @@ package site.devtown.spadeworker.domain.project.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.global.config.audit.BaseEntity;
 
 import javax.persistence.*;
@@ -25,21 +26,32 @@ public class Project extends BaseEntity {
     @Column(length = 1000, nullable = false)
     private String thumbnailImageUri = "PROJECT_DEFAULT_URI";
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
     private Project(
             String title,
             String description,
-            String thumbnailImageUri
+            String thumbnailImageUri,
+            User user
     ) {
         this.title = title;
         this.description = description;
         this.thumbnailImageUri = thumbnailImageUri;
+        this.user = user;
     }
 
     public static Project of(
             String title,
             String description,
-            String thumbnailImageUri
+            String thumbnailImageUri,
+            User user
     ) {
-        return new Project(title, description, thumbnailImageUri);
+        return new Project(
+                title,
+                description,
+                thumbnailImageUri,
+                user
+        );
     }
 }
