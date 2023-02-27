@@ -39,7 +39,10 @@ public class User extends BaseTimeEntity {
     private UserStatus status;
 
     @Column(length = 1000, nullable = false)
-    private String profileImageUrl = "DEFAULT_USER_IMAGE";
+    private String profileImageUrl =
+            "/Users/kmo/toy-project/spadeworker-project/local-storage/images"
+                    + "/user-profile"
+                    + "/user-profile_default.jpg";
 
     @Column(length = 1000)
     private String introduce = null;
