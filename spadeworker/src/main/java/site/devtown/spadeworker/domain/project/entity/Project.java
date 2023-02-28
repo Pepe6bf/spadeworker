@@ -24,7 +24,7 @@ public class Project extends BaseEntity {
     private String description;
 
     @Column(length = 1000, nullable = false)
-    private String thumbnailImageUri = "PROJECT_DEFAULT_URI";
+    private String thumbnailImageUri;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
