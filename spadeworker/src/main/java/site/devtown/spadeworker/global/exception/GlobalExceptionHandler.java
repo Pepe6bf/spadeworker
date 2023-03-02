@@ -5,11 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import javax.persistence.EntityNotFoundException;
 
 import static site.devtown.spadeworker.global.exception.GlobalExceptionCode.*;
 
@@ -18,49 +15,36 @@ import static site.devtown.spadeworker.global.exception.GlobalExceptionCode.*;
 public class GlobalExceptionHandler {
 
     /**
-     * Validation 예외 핸들링
+     * 존재하지 않는 자원 접근 예외 핸들링
+     * Custom Exception
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException e
+    @ExceptionHandler(ResourceNotFoundException.class)
+    protected ResponseEntity<ExceptionResponse> handleResourceNotFoundException(
+            ResourceNotFoundException e
     ) {
-        log.error("handle MethodArgumentNotValidException");
+        log.error("handle ResourceNotFoundException");
         return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_INPUT_VALUE, e.getBindingResult()),
-                HttpStatus.valueOf(INVALID_INPUT_VALUE.getHttpStatus().value())
+                ExceptionResponse.of(e.getCode()),
+                HttpStatus.valueOf(e.getCode().getHttpStatus().value())
         );
     }
 
     /**
-     * EntityNotFound 예외 핸들링
+     * 요청 파라미터 검증 예외 핸들링
+     * Built-In Exception
      */
-    @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<ExceptionResponse> handleEntityNotFoundException(
-            EntityNotFoundException e
-    ) {
-        log.error("handle EntityNotFoundException");
+    @ExceptionHandler(BindException.class)
+    protected ResponseEntity<ExceptionResponse> handleBindException(BindException e) {
+        log.error("handle BindException");
         return new ResponseEntity<>(
-                ExceptionResponse.of(ENTITY_NOT_FOUND, e.getMessage()),
-                HttpStatus.valueOf(ENTITY_NOT_FOUND.getHttpStatus().value())
-        );
-    }
-
-    /**
-     * 유효하지 않은 클라이언트의 요청 값 예외 핸들링
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    protected ResponseEntity<ExceptionResponse> handleIllegalArgumentException(
-            IllegalArgumentException e
-    ) {
-        log.error("handle IllegalArgumentException");
-        return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_INPUT_VALUE, e.getMessage()),
-                HttpStatus.valueOf(INVALID_INPUT_VALUE.getHttpStatus().value())
+                ExceptionResponse.of(INVALID_REQUEST_PARAMETER, e.getBindingResult()),
+                HttpStatus.valueOf(INVALID_REQUEST_PARAMETER.getHttpStatus().value())
         );
     }
 
     /**
      * 유효하지 않은 HTTP Method 요청 예외 핸들링
+     * Built-In Exception
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     protected ResponseEntity<ExceptionResponse> handleHttpRequestMethodNotSupportedException(
@@ -74,21 +58,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 유효하지 않은 타입 변환 예외 핸들링
+     * 유효하지 않은 리소스 소유자의 요청 예외 핸들링
+     * Custom Exception
      */
-    @ExceptionHandler(BindException.class)
-    protected ResponseEntity<ExceptionResponse> handleBindException(
-            BindException e
+    @ExceptionHandler(InvalidResourceOwnerException.class)
+    protected ResponseEntity<ExceptionResponse> handleInvalidResourceOwnerException(
+            InvalidResourceOwnerException e
     ) {
-        log.error("handle BindException");
+        log.error("handle InvalidResourceOwnerException", e);
         return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_INPUT_VALUE, e.getBindingResult()),
-                HttpStatus.valueOf(INVALID_INPUT_VALUE.getHttpStatus().value())
+                ExceptionResponse.of(e.getCode()),
+                HttpStatus.valueOf(e.getCode().getHttpStatus().value())
         );
     }
 
     /**
      * 최상위 예외 핸들링
+     * Built-In Exception
      */
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(

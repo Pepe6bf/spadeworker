@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExceptionResponse {
 
-    private String message;
     private Integer status;
     private String code;
+    private String message;
     private List<FieldError> errors;
     private LocalDateTime timestamp;
 
