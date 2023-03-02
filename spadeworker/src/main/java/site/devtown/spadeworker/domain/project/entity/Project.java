@@ -54,4 +54,17 @@ public class Project extends BaseEntity {
                 user
         );
     }
+
+    /**
+     * Project Update
+     */
+    public void update(
+            String title,
+            String description,
+            String thumbnailImageUri
+    ) {
+        this.title = title;
+        this.description = description;
+        this.thumbnailImageUri = thumbnailImageUri;
+    }
 }

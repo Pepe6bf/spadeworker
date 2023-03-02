@@ -5,4 +5,6 @@ import site.devtown.spadeworker.domain.project.entity.Project;
 
 public interface ProjectRepository
         extends JpaRepository<Project, Long> {
+
+    boolean existsByTitle(String title);
 }
