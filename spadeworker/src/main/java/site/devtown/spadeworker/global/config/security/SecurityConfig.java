@@ -17,6 +17,7 @@ import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationFailureH
 import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationSuccessHandler;
 import site.devtown.spadeworker.domain.auth.handler.TokenAccessDeniedHandler;
 import site.devtown.spadeworker.domain.auth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import site.devtown.spadeworker.domain.auth.service.JwtService;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -25,8 +26,8 @@ import static org.springframework.http.HttpMethod.GET;
 public class SecurityConfig {
 
     private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
-    private final TokenAuthenticationFilter tokenAuthenticationFilter;
     private final OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository;
+    private final JwtService jwtService;
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
@@ -46,14 +47,6 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        // 토큰 예외 처리 설정
-        http
-                .exceptionHandling()
-                // 토큰 인증 필터에서 발생한 예외를 처리
-                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                // 401, 403 예외 핸들러를 직접 제작한 핸들러로 넣어줌
-                .accessDeniedHandler(tokenAccessDeniedHandler);
-
         // 권한별 접근 요청 설정
         http
                 .authorizeRequests()
@@ -62,12 +55,16 @@ public class SecurityConfig {
                 // 나머지는 모두 인증 필요
                 .anyRequest().authenticated();
 
-        // 인증 된 사용자 토큰 검증 필터 설정
+        // JWT 검증 필터 및 예외처리 등록
         http
                 .addFilterBefore(
-                        tokenAuthenticationFilter,
+                        new TokenAuthenticationFilter(jwtService),
                         UsernamePasswordAuthenticationFilter.class
-                );
+                )
+                .exceptionHandling()
+                // 토큰 인증 필터에서 발생한 예외를 처리
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                .accessDeniedHandler(tokenAccessDeniedHandler);
 
         // front 에서 login 시 요청할 url
         http.oauth2Login()
