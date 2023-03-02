@@ -14,7 +14,6 @@ import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.*
 
 @Slf4j
 public class AuthToken {
-
     @Getter
     private final String tokenValue;
     private final Key key;
