@@ -11,7 +11,7 @@ import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationSuccessH
 import site.devtown.spadeworker.domain.auth.handler.TokenAccessDeniedHandler;
 import site.devtown.spadeworker.domain.auth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepository;
-import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
+import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.domain.user.repository.RoleRepository;
 
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
 @Configuration
 public class OAuth2Config {
 
-    private final AuthTokenProvider tokenProvider;
+    private final JwtService jwtService;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final RoleRepository roleRepository;
     private final HandlerExceptionResolver handlerExceptionResolver;
@@ -48,7 +48,7 @@ public class OAuth2Config {
     @Bean
     public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
         return new OAuth2AuthenticationSuccessHandler(
-                tokenProvider,
+                jwtService,
                 userRefreshTokenRepository,
                 oAuth2AuthorizationRequestBasedOnCookieRepository(),
                 roleRepository,

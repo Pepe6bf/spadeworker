@@ -8,8 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import site.devtown.spadeworker.domain.auth.exception.TokenValidFailedException;
+import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
-import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
 import site.devtown.spadeworker.global.util.HeaderUtil;
 
 import javax.servlet.FilterChain;
@@ -26,7 +26,7 @@ import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.*
 @Slf4j
 @RequiredArgsConstructor
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
-    private final AuthTokenProvider tokenProvider;
+    private final JwtService jwtService;
 
     @Override
     protected void doFilterInternal(
@@ -36,17 +36,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // access token str 파싱
-        String tokenValue = HeaderUtil.getAccessToken(request);
+        String accessTokenValue = HeaderUtil.getAccessToken(request);
 
         // 토큰이 없을 경우
-        if (tokenValue == null) {
+        if (accessTokenValue == null) {
             request.setAttribute("exception", NO_TOKEN.getCode());
             filterChain.doFilter(request, response);
             return;
         }
 
         // 토큰 값을 AuthToken 객체로 변환
-        AuthToken token = tokenProvider.convertAccessToken(tokenValue);
+        AuthToken accessAuthToken = jwtService.createAuthTokenFromAccessTokenValue(accessTokenValue);
 
         // token 을 재발급 하는 경우
         String path = request.getRequestURI();
@@ -56,8 +56,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            if (token.validate()) {
-                Authentication authentication = tokenProvider.getAuthentication(token);
+            if (accessAuthToken.validate()) {
+                Authentication authentication = jwtService.getAuthentication(accessAuthToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (ExpiredJwtException e) {

@@ -12,8 +12,8 @@ import site.devtown.spadeworker.domain.auth.model.info.OAuth2UserInfo;
 import site.devtown.spadeworker.domain.auth.model.info.OAuth2UserInfoFactory;
 import site.devtown.spadeworker.domain.auth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepository;
+import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
-import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
 import site.devtown.spadeworker.domain.auth.token.UserRefreshToken;
 import site.devtown.spadeworker.domain.user.model.constant.AuthProviderType;
 import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
@@ -39,8 +39,7 @@ import static site.devtown.spadeworker.domain.auth.repository.OAuth2Authorizatio
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler
         extends SimpleUrlAuthenticationSuccessHandler {
-
-    private final AuthTokenProvider jwtProvider;
+    private final JwtService jwtService;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
     private final RoleRepository roleRepository;
@@ -97,7 +96,7 @@ public class OAuth2AuthenticationSuccessHandler
         ).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 권한입니다."));
 
         // access token 생성
-        AuthToken accessToken = jwtProvider.createAccessToken(
+        AuthToken accessToken = jwtService.createAccessToken(
                 userInfo.getId(),
                 List.of(role.getRoleType())
         );
@@ -105,7 +104,7 @@ public class OAuth2AuthenticationSuccessHandler
         log.info("[Access-Token] = {}", accessToken.getTokenValue());
 
         // refresh 토큰 생성
-        AuthToken refreshToken = jwtProvider.createRefreshToken(
+        AuthToken refreshToken = jwtService.createRefreshToken(
                 userInfo.getId(),
                 List.of(role.getRoleType())
         );

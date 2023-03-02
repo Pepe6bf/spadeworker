@@ -1,23 +1,13 @@
 package site.devtown.spadeworker.domain.auth.token;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import site.devtown.spadeworker.domain.auth.exception.TokenValidFailedException;
 import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class AuthTokenProvider {
@@ -43,7 +33,7 @@ public class AuthTokenProvider {
     /**
      * Access Token 생성
      */
-    public AuthToken createAccessToken(
+    public AuthToken generateAccessToken(
             String personalId,
             List<UserRoleType> roles
     ) {
@@ -58,7 +48,7 @@ public class AuthTokenProvider {
     /**
      * Refresh Token 생성
      */
-    public AuthToken createRefreshToken(
+    public AuthToken generateRefreshToken(
             String personalId,
             List<UserRoleType> roles
     ) {
@@ -73,36 +63,14 @@ public class AuthTokenProvider {
     /**
      * Access Token 값을 기반으로 AuthToken 객체 생성
      */
-    public AuthToken convertAccessToken(String accessToken) {
+    public AuthToken convertAccessTokenToAuthToken(String accessToken) {
         return AuthToken.of(accessToken, accessTokenSecretKey);
     }
 
     /**
      * Refresh Token 값을 기반으로 AuthToken 객체 생성
      */
-    public AuthToken convertRefreshToken(String refreshToken) {
+    public AuthToken convertRefreshTokenToAuthToken(String refreshToken) {
         return AuthToken.of(refreshToken, refreshTokenSecretKey);
-    }
-
-    /**
-     * 토큰으로 사용자 인가 조회
-     */
-    public Authentication getAuthentication(AuthToken token) {
-        if (!token.validate()) {
-            throw new TokenValidFailedException();
-        }
-
-        Claims claims = token.getTokenClaims();
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(new String[]{claims.get("roles").toString()})
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        User userPrincipal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(
-                userPrincipal,
-                token,
-                userPrincipal.getAuthorities()
-        );
     }
 }
