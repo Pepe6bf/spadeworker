@@ -143,18 +143,4 @@ public class AuthExceptionHandler {
                 HttpStatus.valueOf(EXPIRED_TOKEN.getHttpStatus().value())
         );
     }
-
-    /**
-     * IllegalArgumentException 예외 핸들링
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            IllegalArgumentException e
-    ) {
-        log.error("handle IllegalArgumentException");
-        return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_TOKEN_COMPACT, INVALID_TOKEN_COMPACT.getMessage()),
-                HttpStatus.valueOf(INVALID_TOKEN_COMPACT.getHttpStatus().value())
-        );
-    }
 }
