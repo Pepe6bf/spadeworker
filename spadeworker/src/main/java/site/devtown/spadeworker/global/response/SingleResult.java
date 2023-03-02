@@ -10,8 +10,8 @@ public class SingleResult<T> extends CommonResult {
 
     private T data;
 
-    public SingleResult(Boolean isSuccess, Integer status, String message, T data) {
-        super(isSuccess, status, message);
+    public SingleResult(Integer status, String message, T data) {
+        super(status, message);
         this.data = data;
     }
 }

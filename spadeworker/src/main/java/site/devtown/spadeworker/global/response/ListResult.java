@@ -12,8 +12,8 @@ public class ListResult<T> extends CommonResult {
 
     private List<T> data;
 
-    public ListResult(Boolean isSuccess, Integer status, String message, List<T> data) {
-        super(isSuccess, status, message);
+    public ListResult(Integer status, String message, List<T> data) {
+        super(status, message);
         this.data = data;
     }
 }
