@@ -19,6 +19,11 @@ spring:
       hibernate.format_sql:
       hibernate.default_batch_fetch_size:
 
+  servlet:
+    multipart:
+      max-file-size:
+      max-request-size:
+
   # OAuth Config
   security:
     oauth2.client:
@@ -41,3 +46,7 @@ spring:
           tokenUri:
           userInfoUri:
           userNameAttribute:
+
+# file upload path
+file:
+  local-image-storage-location:

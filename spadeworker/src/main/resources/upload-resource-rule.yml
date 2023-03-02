@@ -1,0 +1,6 @@
+image:
+  allow-extensions: jpg, jpeg, png
+  project-thumbnail-image:
+    default-image-name: project-thumbnail_default.jpg
+    default-image-uri: /Users/kmo/toy-project/spadeworker-project/local-storage/images/project-thumbnail/project-thumbnail_default.jpg
+    limit-size: 3000000
