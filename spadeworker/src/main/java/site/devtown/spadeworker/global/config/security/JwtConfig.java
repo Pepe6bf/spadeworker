@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import site.devtown.spadeworker.domain.auth.filter.TokenAuthenticationFilter;
 import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
 import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
 
@@ -35,13 +34,5 @@ public class JwtConfig {
                 refreshTokenSecretKey,
                 refreshTokenExpiry
         );
-    }
-
-    /*
-     * 토큰 검증 필터 설정
-     * */
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(jwtProvider());
     }
 }

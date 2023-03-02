@@ -3,6 +3,8 @@ package site.devtown.spadeworker.domain.auth.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -23,8 +25,10 @@ import site.devtown.spadeworker.domain.user.repository.UserRepository;
 import site.devtown.spadeworker.domain.user.repository.UserRoleRepository;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * OAuth2 기반으로 소셜 로그인 OR 회원가입을 구현하는 핵심 로직
@@ -75,11 +79,16 @@ public class CustomOAuth2UserService
         // 계정이 존재하지 않을 경우 회원 가입을 진행
         User user = userRepository.findByPersonalId(userInfo.getId())
                 .orElseGet(() -> createUser(userInfo, providerType));
-        List<UserRoleType> roles = userRoleRepository.findAllByUser(user)
+        // TODO : 아래 로직을 더 줄일 수 있는지 고민하고 리펙토링
+        Collection<GrantedAuthority> authorities = userRoleRepository.findAllByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException("사용자 권한이 존재하지 않습니다."))
                 .stream()
                 .map(r -> r.getRole().getRoleType())
-                .toList();
+                .toList()
+                .stream()
+                .map(r -> new SimpleGrantedAuthority(r.toString()))
+                .collect(Collectors.toList());
+
         // 회원 가입 된 계정의 로그인 유형과 현재 로그인 한 유형이 일치한지 검증
         if (providerType != user.getProviderType()) {
             throw new OAuthProviderMissMatchException(
@@ -87,7 +96,7 @@ public class CustomOAuth2UserService
             );
         }
 
-        return UserPrincipal.from(user, roles, oAuth2User.getAttributes());
+        return UserPrincipal.from(user, authorities, oAuth2User.getAttributes());
     }
 
     /**
