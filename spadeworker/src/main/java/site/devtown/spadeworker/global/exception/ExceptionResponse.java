@@ -87,6 +87,9 @@ public class ExceptionResponse {
         return new GsonUtil().toJson(this);
     }
 
+    /**
+     * 입력 값 검증 에러를 상세하게 표현하는 Inner Class
+     */
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class FieldError {
