@@ -43,7 +43,6 @@ public class ProjectService {
     @Value("${image.project-thumbnail-image.default-image-uri}")
     private String localStorageDefaultProjectThumbnailImageUri;
 
-
     /**
      * 프로젝트 전체 조회
      */
@@ -127,7 +126,8 @@ public class ProjectService {
     private String createProjectThumbnailImage(
             MultipartFile requestImage
     ) throws Exception {
-        return (!Objects.equals(requestImage.getOriginalFilename(), localStorageDefaultProjectThumbnailImageName)) ?
+        return (!Objects.equals(requestImage.getOriginalFilename(),
+                localStorageDefaultProjectThumbnailImageName)) ?
                 imageFileService.uploadFile(PROJECT_THUMBNAIL_IMAGE, requestImage) :
                 localStorageDefaultProjectThumbnailImageUri;
     }

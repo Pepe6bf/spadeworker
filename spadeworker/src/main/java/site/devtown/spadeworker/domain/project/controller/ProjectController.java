@@ -57,7 +57,7 @@ public class ProjectController {
     ) throws Exception {
         return responseService.getSingleResult(
                 OK.value(),
-                "프로젝트가 성공적으로 생성되었습니다.",
+                "성공적으로 프로젝트가 생성되었습니다.",
                 projectService.createProject(request)
         );
     }
@@ -72,7 +72,7 @@ public class ProjectController {
     ) throws Exception {
         return responseService.getSingleResult(
                 OK.value(),
-                "프로젝트가 성공적으로 수정되었습니다.",
+                "성공적으로 프로젝트가 수정되었습니다.",
                 projectService.updateProject(
                         projectId,
                         request
