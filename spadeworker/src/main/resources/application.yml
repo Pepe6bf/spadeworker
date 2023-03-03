@@ -46,7 +46,3 @@ spring:
           tokenUri:
           userInfoUri:
           userNameAttribute:
-
-# file upload path
-file:
-  local-image-storage-location:

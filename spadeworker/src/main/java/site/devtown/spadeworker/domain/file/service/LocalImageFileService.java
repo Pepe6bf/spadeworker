@@ -1,20 +1,26 @@
 package site.devtown.spadeworker.domain.file.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.devtown.spadeworker.domain.file.constant.ImageFileType;
 import site.devtown.spadeworker.domain.file.exception.ImageFileNotFoundException;
+import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
 
 import java.io.File;
 import java.util.Objects;
 import java.util.UUID;
 
+@PropertySource(
+        value = "classpath:/upload-resource-rule.yml",
+        factory = YamlPropertySourceFactory.class
+)
 @Service
 public class LocalImageFileService
         implements ImageFileService {
 
-    @Value("${file.local-image-storage-location}")
+    @Value("${image.local-image-storage-location}")
     private String localFileStorageLocation;
 
     @Override

@@ -1,4 +1,5 @@
 image:
+  local-image-storage-location: /Users/kmo/toy-project/spadeworker-project/local-storage/images
   allow-extensions: jpg, jpeg, png
   project-thumbnail-image:
     default-image-name: project-thumbnail_default.jpg
