@@ -51,7 +51,6 @@ public class OAuth2Config {
                 jwtService,
                 userRefreshTokenRepository,
                 oAuth2AuthorizationRequestBasedOnCookieRepository(),
-                roleRepository,
                 authorizedRedirectUris,
                 cookieMaxAge
         );

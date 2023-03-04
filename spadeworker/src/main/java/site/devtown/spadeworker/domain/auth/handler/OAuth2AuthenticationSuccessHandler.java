@@ -16,12 +16,8 @@ import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
 import site.devtown.spadeworker.domain.auth.token.UserRefreshToken;
 import site.devtown.spadeworker.domain.user.model.constant.AuthProviderType;
-import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
-import site.devtown.spadeworker.domain.user.model.entity.Role;
-import site.devtown.spadeworker.domain.user.repository.RoleRepository;
 import site.devtown.spadeworker.global.util.CookieUtil;
 
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +38,6 @@ public class OAuth2AuthenticationSuccessHandler
     private final JwtService jwtService;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
-    private final RoleRepository roleRepository;
     private final List<String> authorizedRedirectUris;
     private final Integer cookieMaxAge;
 
@@ -90,15 +85,10 @@ public class OAuth2AuthenticationSuccessHandler
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(providerType, user.getAttributes());
         Collection<? extends GrantedAuthority> authorities = ((OidcUser) authentication.getPrincipal()).getAuthorities();
 
-        // TODO : 해당 로직은 USER || ADMIN 권한만 추출 할 수 있음. 향후 권한이 추가될 경우 리펙토링이 필요함.
-        Role role = roleRepository.findByRoleType(
-                hasAuthority(authorities, UserRoleType.ADMIN.getCode()) ? UserRoleType.ADMIN : UserRoleType.USER
-        ).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 권한입니다."));
-
         // access token 생성
         AuthToken accessToken = jwtService.createAccessToken(
                 userInfo.getId(),
-                List.of(role.getRoleType())
+                authorities
         );
 
         log.info("[Access-Token] = {}", accessToken.getTokenValue());
@@ -106,7 +96,7 @@ public class OAuth2AuthenticationSuccessHandler
         // refresh 토큰 생성
         AuthToken refreshToken = jwtService.createRefreshToken(
                 userInfo.getId(),
-                List.of(role.getRoleType())
+                authorities
         );
 
         // refresh 토큰 DB에 저장
@@ -149,25 +139,6 @@ public class OAuth2AuthenticationSuccessHandler
                     return authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
                             && authorizedURI.getPort() == clientRedirectUri.getPort();
                 });
-    }
-
-    /**
-     * 권한을 가지고 있는지 체크
-     */
-    private boolean hasAuthority(
-            Collection<? extends GrantedAuthority> authorities,
-            String authority
-    ) {
-        if (authorities == null) {
-            return false;
-        }
-
-        for (GrantedAuthority grantedAuthority : authorities) {
-            if (authority.equals(grantedAuthority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

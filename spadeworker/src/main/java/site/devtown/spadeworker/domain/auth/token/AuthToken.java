@@ -3,13 +3,13 @@ package site.devtown.spadeworker.domain.auth.token;
 import io.jsonwebtoken.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
 import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
 import site.devtown.spadeworker.domain.auth.exception.NotExpiredTokenException;
-import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.*;
@@ -22,7 +22,7 @@ public class AuthToken {
 
     private AuthToken(
             String personalId,
-            List<UserRoleType> roles,
+            Collection<? extends GrantedAuthority> roles,
             Date expiry,
             Key key
     ) {
@@ -32,7 +32,7 @@ public class AuthToken {
 
     public static AuthToken of(
             String personalId,
-            List<UserRoleType> roles,
+            Collection<? extends GrantedAuthority> roles,
             Date expiry,
             Key key
     ) {
@@ -59,11 +59,11 @@ public class AuthToken {
      */
     private String generateAccessTokenValue(
             String personalId,
-            List<UserRoleType> userRoles,
+            Collection<? extends GrantedAuthority> userRoles,
             Date expiry
     ) {
         String roles = userRoles.stream()
-                .map(UserRoleType::toString)
+                .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         Claims claims = Jwts.claims()

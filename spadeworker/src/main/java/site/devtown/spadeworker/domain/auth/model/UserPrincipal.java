@@ -18,20 +18,20 @@ public record UserPrincipal(
         String personalId,
         AuthProviderType providerType,
         UserStatus userStatus,
-        Collection<GrantedAuthority> authorities,
+        Collection<? extends GrantedAuthority> authorities,
         Map<String, Object> oAuth2UserInfoAttributes
 ) implements UserDetails, OAuth2User, OidcUser {
 
     public static UserPrincipal from(
             User user,
-            Collection<GrantedAuthority> authorities
+            Collection<? extends GrantedAuthority> authorities
     ) {
         return from(user, authorities, null);
     }
 
     public static UserPrincipal from(
             User user,
-            Collection<GrantedAuthority> authorities,
+            Collection<? extends GrantedAuthority> authorities,
             Map<String, Object> oAuth2UserInfo
     ) {
         return new UserPrincipal(
