@@ -232,4 +232,5 @@ src/main/resources/oauth.properties
 ### Init Data for DB ###
 src/main/resources/data.sql
 
+src/test
 # End of https://www.toptal.com/developers/gitignore/api/java,gradle,intellij+all,visualstudiocode,macos,windows

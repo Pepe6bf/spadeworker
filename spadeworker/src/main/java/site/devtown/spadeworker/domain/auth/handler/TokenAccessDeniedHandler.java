@@ -21,7 +21,6 @@ public class TokenAccessDeniedHandler
             AccessDeniedException accessDeniedException
     ) throws IOException {
         // TODO : 아래 주석 처리 된 로직 분석하기
-//        response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
         handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
     }
 }

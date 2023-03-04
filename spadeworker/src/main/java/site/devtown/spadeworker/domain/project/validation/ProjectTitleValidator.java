@@ -7,8 +7,8 @@ import site.devtown.spadeworker.domain.project.repository.ProjectRepository;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class ProjectTitleValidator
         implements ConstraintValidator<ProjectTitleDuplicateValidate, String> {
 

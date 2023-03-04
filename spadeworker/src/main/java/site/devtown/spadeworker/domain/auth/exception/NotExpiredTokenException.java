@@ -5,8 +5,4 @@ public class NotExpiredTokenException extends RuntimeException {
     public NotExpiredTokenException() {
         super("Not Expired Token.");
     }
-
-    public NotExpiredTokenException(String message) {
-        super(message);
-    }
 }

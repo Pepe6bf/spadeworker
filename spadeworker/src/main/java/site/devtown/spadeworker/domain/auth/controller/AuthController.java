@@ -6,6 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
 import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
 import site.devtown.spadeworker.global.response.CommonResult;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.OK;
+import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.REQUEST_TOKEN_NOT_FOUND;
 
 @RequiredArgsConstructor
 @PropertySource(
@@ -45,12 +47,18 @@ public class AuthController {
     ) {
         // access token 확인
         String accessToken = HeaderUtil.getAccessToken(request);
+
+        // 요청에 토큰이 존재하는지 검증
+        if (accessToken == null) {
+            throw new InvalidTokenException(REQUEST_TOKEN_NOT_FOUND);
+        }
+
         // refresh token 확인
         String refreshToken = CookieUtil.getCookie(request, REFRESH_TOKEN)
                 .map(Cookie::getValue)
                 .orElse((null));
 
-        Map<String, String> newTokens = jwtService.tokenReissue(accessToken, refreshToken);
+        Map<String, String> newTokens = jwtService.reissueToken(accessToken, refreshToken);
 
         int cookieMaxAge = (int) refreshTokenExpiry / 60;
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);

@@ -1,5 +1,8 @@
 package site.devtown.spadeworker.global.exception;
 
+/**
+ * 유효하지 않은 자원 소유자 예외
+ */
 public class InvalidResourceOwnerException
         extends RuntimeException {
     private final ExceptionCode code;

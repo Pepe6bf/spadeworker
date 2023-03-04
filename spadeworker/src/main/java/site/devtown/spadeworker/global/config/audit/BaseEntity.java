@@ -9,7 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 
-
 @Getter
 @MappedSuperclass
 @EntityListeners(value = {AuditingEntityListener.class})

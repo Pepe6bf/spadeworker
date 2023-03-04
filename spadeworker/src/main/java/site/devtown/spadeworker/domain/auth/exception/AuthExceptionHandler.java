@@ -1,8 +1,5 @@
 package site.devtown.spadeworker.domain.auth.exception;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,66 +16,27 @@ import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.*
 public class AuthExceptionHandler {
 
     /**
-     * SecurityException 예외 핸들링
+     * TokenValidFailedException 핸들링
+     * Custom Exception
      */
-    @ExceptionHandler(SecurityException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            SecurityException e
+    @ExceptionHandler(InvalidTokenException.class)
+    protected ResponseEntity<ExceptionResponse> handleInvalidTokenException(
+            InvalidTokenException e
     ) {
-        log.error("handle SecurityException");
+        AuthExceptionCode authExceptionCode = e.getAuthExceptionCode();
+        log.error("{}", e.getMessage());
         return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_TOKEN_SIGNATURE, INVALID_TOKEN_SIGNATURE.getMessage()),
-                HttpStatus.valueOf(INVALID_TOKEN_SIGNATURE.getHttpStatus().value())
+                ExceptionResponse.of(authExceptionCode, authExceptionCode.getMessage()),
+                HttpStatus.valueOf(authExceptionCode.getHttpStatus().value())
         );
     }
 
     /**
-     * MalformedJwtException 예외 핸들링
-     */
-    @ExceptionHandler(MalformedJwtException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            MalformedJwtException e
-    ) {
-        log.error("handle MalformedJwtException");
-        return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_TOKEN, INVALID_TOKEN.getMessage()),
-                HttpStatus.valueOf(INVALID_TOKEN.getHttpStatus().value())
-        );
-    }
-
-    /**
-     * TokenValidFailedException 예외 핸들링
-     */
-    @ExceptionHandler(TokenValidFailedException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            TokenValidFailedException e
-    ) {
-        log.error("handle TokenValidFailedException");
-        return new ResponseEntity<>(
-                ExceptionResponse.of(INVALID_TOKEN, e.getMessage()),
-                HttpStatus.valueOf(INVALID_TOKEN.getHttpStatus().value())
-        );
-    }
-
-    /**
-     * ExpiredJwtException 예외 핸들링
-     */
-    @ExceptionHandler(ExpiredJwtException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            ExpiredJwtException e
-    ) {
-        log.error("handle ExpiredJwtException");
-        return new ResponseEntity<>(
-                ExceptionResponse.of(EXPIRED_TOKEN, EXPIRED_TOKEN.getMessage()),
-                HttpStatus.valueOf(EXPIRED_TOKEN.getHttpStatus().value())
-        );
-    }
-
-    /**
-     * NotExpiredTokenException
+     * NotExpiredTokenException 핸들링
+     * Custom Exception
      */
     @ExceptionHandler(NotExpiredTokenException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+    protected ResponseEntity<ExceptionResponse> handleNotExpiredTokenException(
             NotExpiredTokenException e
     ) {
         log.error("handle NotExpiredTokenException");
@@ -89,24 +47,26 @@ public class AuthExceptionHandler {
     }
 
     /**
-     * UnsupportedJwtException 예외 핸들링
+     * OAuthProviderMissMatchException 핸들링
+     * Custom Exception
      */
-    @ExceptionHandler(UnsupportedJwtException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            UnsupportedJwtException e
+    @ExceptionHandler(OAuthProviderMisMatchException.class)
+    protected ResponseEntity<ExceptionResponse> handleOAuthProviderMissMatchException(
+            OAuthProviderMisMatchException e
     ) {
-        log.error("handle UnsupportedJwtException");
+        log.error("handle OAuthProviderMissMatchException");
         return new ResponseEntity<>(
-                ExceptionResponse.of(UNSUPPORTED_TOKEN, UNSUPPORTED_TOKEN.getMessage()),
-                HttpStatus.valueOf(UNSUPPORTED_TOKEN.getHttpStatus().value())
+                ExceptionResponse.of(OAUTH_PROVIDER_MISMATCH, e.getMessage()),
+                HttpStatus.valueOf(OAUTH_PROVIDER_MISMATCH.getHttpStatus().value())
         );
     }
 
     /**
-     * AuthenticationException 예외 핸들링
+     * AuthenticationException 핸들링
+     * Built-in Exception
      */
     @ExceptionHandler(AuthenticationException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+    protected ResponseEntity<ExceptionResponse> handleAuthenticationException(
             AuthenticationException e
     ) {
         log.error("handle AuthenticationException");
@@ -117,30 +77,17 @@ public class AuthExceptionHandler {
     }
 
     /**
-     * InternalAuthenticationServiceException 예외 핸들링
+     * InternalAuthenticationServiceException 핸들링
+     * Built-in Exception
      */
     @ExceptionHandler(InternalAuthenticationServiceException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+    protected ResponseEntity<ExceptionResponse> handleInternalAuthenticationServiceException(
             InternalAuthenticationServiceException e
     ) {
         log.error("handle InternalAuthenticationServiceException");
         return new ResponseEntity<>(
                 ExceptionResponse.of(INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION, INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION.getMessage()),
                 HttpStatus.valueOf(INTERNAL_AUTHENTICATION_SERVICE_EXCEPTION.getHttpStatus().value())
-        );
-    }
-
-    /**
-     * ExpiredTokenException 예외 핸들링
-     */
-    @ExceptionHandler(ExpiredTokenException.class)
-    protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
-            ExpiredTokenException e
-    ) {
-        log.error("handle ExpiredTokenException");
-        return new ResponseEntity<>(
-                ExceptionResponse.of(EXPIRED_TOKEN, e.getMessage()),
-                HttpStatus.valueOf(EXPIRED_TOKEN.getHttpStatus().value())
         );
     }
 }

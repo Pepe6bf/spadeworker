@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import site.devtown.spadeworker.domain.auth.exception.OAuthProviderMissMatchException;
+import site.devtown.spadeworker.domain.auth.exception.OAuthProviderMisMatchException;
 import site.devtown.spadeworker.domain.auth.model.UserPrincipal;
 import site.devtown.spadeworker.domain.auth.model.info.OAuth2UserInfo;
 import site.devtown.spadeworker.domain.auth.model.info.OAuth2UserInfoFactory;
@@ -26,7 +26,6 @@ import site.devtown.spadeworker.domain.user.repository.UserRoleRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -91,7 +90,7 @@ public class CustomOAuth2UserService
 
         // 회원 가입 된 계정의 로그인 유형과 현재 로그인 한 유형이 일치한지 검증
         if (providerType != user.getProviderType()) {
-            throw new OAuthProviderMissMatchException(
+            throw new OAuthProviderMisMatchException(
                     "이미 " + user.getProviderType() + "계정으로 가입하셨습니다. 해당 소셜 로그인으로 다시 시도해주세요."
             );
         }

@@ -1,7 +1,6 @@
 package site.devtown.spadeworker.domain.auth.service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -9,9 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.devtown.spadeworker.domain.auth.exception.ExpiredTokenException;
-import site.devtown.spadeworker.domain.auth.exception.NotExpiredTokenException;
-import site.devtown.spadeworker.domain.auth.exception.TokenValidFailedException;
+import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
 import site.devtown.spadeworker.domain.auth.model.UserPrincipal;
 import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepository;
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
@@ -62,27 +59,33 @@ public class JwtService {
      * refresh token 확인 후 토큰 전체 재발급
      */
     @Transactional
-    public Map<String, String> tokenReissue(
-            String accessToken,
-            String refreshToken
+    public Map<String, String> reissueToken(
+            String expiredAccessTokenValue,
+            String refreshTokenValue
     ) {
-        AuthToken authToken = createAuthTokenFromAccessTokenValue(accessToken);
-        Claims claims = getTokenClaims(authToken);
+        AuthToken expiredAccessToken = createAuthTokenFromAccessTokenValue(expiredAccessTokenValue);
+        // 만료된 토큰의 Claim 조회
+        Claims expiredTokenClaims = expiredAccessToken.getExpiredTokenClaims();
 
-        String userId = claims.getSubject();
-        UserRoleType roleType = UserRoleType.of(claims.get("roles", String.class));
+        String userId = expiredTokenClaims.getSubject();
+        UserRoleType roleType = UserRoleType.of(expiredTokenClaims.get("roles", String.class));
 
-        AuthToken authRefreshToken = createAuthTokenFromRefreshTokenValue(refreshToken);
+        AuthToken refreshToken = createAuthTokenFromRefreshTokenValue(refreshTokenValue);
 
         // refreshToken 검증
-        validateRefreshToken(authRefreshToken);
+        try {
+            refreshToken.validate();
+        } catch (InvalidTokenException e) {
+            throw new InvalidTokenException(INVALID_REFRESH_TOKEN);
+        }
 
         // userId refresh token 으로 DB 확인
         UserRefreshToken userRefreshToken = userRefreshTokenRepository.findByPersonalIdAndTokenValue(
                 userId,
-                refreshToken
-        ).orElseThrow(() -> new TokenValidFailedException(INVALID_REFRESH_TOKEN.getMessage()));
+                refreshTokenValue
+        ).orElseThrow(() -> new InvalidTokenException(INVALID_REFRESH_TOKEN));
 
+        // 새로운 access token 발급
         AuthToken newAccessToken = createAccessToken(userId, List.of(roleType));
 
         // Refresh Token Rotation
@@ -112,12 +115,12 @@ public class JwtService {
     /**
      * JWT 값을 기반으로 사용자 인가 조회
      */
-    public Authentication getAuthentication(AuthToken token) {
-        if (!token.validate()) {
-            throw new TokenValidFailedException();
-        }
+    public Authentication getAuthentication(AuthToken accessToken) {
+        // access token 검증
+        accessToken.validate();
 
-        Claims claims = token.getTokenClaims();
+        // access token claims 조회
+        Claims claims = accessToken.getTokenClaims();
         // claims 값을 기반으로 사용자 Entity 조회
         User user = userRepository.findByPersonalId(claims.getSubject())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
@@ -129,7 +132,7 @@ public class JwtService {
 
         return new UsernamePasswordAuthenticationToken(
                 userPrincipal,
-                token,
+                accessToken,
                 userPrincipal.getAuthorities()
         );
     }
@@ -146,32 +149,5 @@ public class JwtService {
      */
     public AuthToken createAuthTokenFromRefreshTokenValue(String refreshToken) {
         return tokenProvider.convertRefreshTokenToAuthToken(refreshToken);
-    }
-
-    // 토큰 Claim 정보 조회
-    private Claims getTokenClaims(AuthToken token) {
-        Claims claims = null;
-        try {
-            token.validate();
-        } catch (ExpiredJwtException e) {
-            claims = token.getExpiredTokenClaims();
-        }
-
-        if (claims == null) {
-            throw new NotExpiredTokenException();
-        }
-
-        return claims;
-    }
-
-    // 리프레쉬 토큰 검증
-    private void validateRefreshToken(AuthToken token) {
-        try {
-            token.validate();
-        } catch (TokenValidFailedException e) {
-            throw new TokenValidFailedException(INVALID_REFRESH_TOKEN.getMessage());
-        } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException(INVALID_REFRESH_TOKEN.getMessage());
-        }
     }
 }

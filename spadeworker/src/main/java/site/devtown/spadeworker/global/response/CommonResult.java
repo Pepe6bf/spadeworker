@@ -10,6 +10,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CommonResult {
     private Integer status;
-
     private String message;
 }

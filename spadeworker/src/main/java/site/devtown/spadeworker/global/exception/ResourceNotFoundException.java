@@ -2,6 +2,9 @@ package site.devtown.spadeworker.global.exception;
 
 import javax.persistence.EntityNotFoundException;
 
+/**
+ * 존재하지 않는 자원 예외
+ */
 public class ResourceNotFoundException
         extends EntityNotFoundException {
     private final ExceptionCode code;
