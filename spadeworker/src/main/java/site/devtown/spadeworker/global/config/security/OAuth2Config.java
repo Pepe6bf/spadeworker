@@ -5,14 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationFailureHandler;
 import site.devtown.spadeworker.domain.auth.handler.OAuth2AuthenticationSuccessHandler;
 import site.devtown.spadeworker.domain.auth.handler.TokenAccessDeniedHandler;
 import site.devtown.spadeworker.domain.auth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepository;
 import site.devtown.spadeworker.domain.auth.service.JwtService;
-import site.devtown.spadeworker.domain.user.repository.RoleRepository;
 
 import java.util.List;
 
@@ -25,8 +23,6 @@ public class OAuth2Config {
 
     private final JwtService jwtService;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
-    private final RoleRepository roleRepository;
-    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Value("${oauth2.authorized-redirect-uris}")
     private List<String> authorizedRedirectUris;
@@ -67,12 +63,10 @@ public class OAuth2Config {
     }
 
     /**
-     * 토큰 접근 거부 핸들러
+     * 사용자 인가 오류 처리 핸들러
      */
     @Bean
     public TokenAccessDeniedHandler tokenAccessDeniedHandler() {
-        return new TokenAccessDeniedHandler(
-                handlerExceptionResolver
-        );
+        return new TokenAccessDeniedHandler();
     }
 }
