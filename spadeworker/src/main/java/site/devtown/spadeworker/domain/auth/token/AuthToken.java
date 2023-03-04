@@ -59,14 +59,17 @@ public class AuthToken {
      */
     private String generateAccessTokenValue(
             String personalId,
-            List<UserRoleType> roles,
+            List<UserRoleType> userRoles,
             Date expiry
     ) {
+        String roles = userRoles.stream()
+                .map(UserRoleType::toString)
+                .collect(Collectors.joining(","));
 
         Claims claims = Jwts.claims()
-                .setSubject(personalId) // 토큰 제목 설정
-                .setIssuedAt(new Date(System.currentTimeMillis()))    // 토큰 생성일 설정
-                .setExpiration(expiry);// 토큰 만료일 설정
+                .setSubject(personalId)  // 토큰 제목 설정
+                .setIssuedAt(new Date(System.currentTimeMillis()))  // 토큰 생성일 설정
+                .setExpiration(expiry);  // 토큰 만료일 설정
         claims.put("roles", roles);
 
         return Jwts.builder()
