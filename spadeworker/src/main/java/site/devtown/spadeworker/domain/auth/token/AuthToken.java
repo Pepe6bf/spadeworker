@@ -3,12 +3,14 @@ package site.devtown.spadeworker.domain.auth.token;
 import io.jsonwebtoken.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import site.devtown.spadeworker.domain.auth.exception.TokenValidFailedException;
+import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
+import site.devtown.spadeworker.domain.auth.exception.NotExpiredTokenException;
 import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.*;
 
@@ -77,11 +79,23 @@ public class AuthToken {
      * Token Claim 조회
      */
     public Claims getTokenClaims() {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(tokenValue)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(tokenValue)
+                    .getBody();
+        } catch (SecurityException e) {
+            throw new InvalidTokenException(INVALID_TOKEN_SIGNATURE);
+        } catch (ExpiredJwtException e) {
+            throw new InvalidTokenException(EXPIRED_TOKEN, e.getClaims());
+        } catch (UnsupportedJwtException e) {
+            throw new InvalidTokenException(UNSUPPORTED_TOKEN);
+        } catch (JwtException e) {
+            throw new InvalidTokenException(INVALID_TOKEN);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidTokenException(INVALID_TOKEN_COMPACT);
+        }
     }
 
     /**
@@ -90,24 +104,20 @@ public class AuthToken {
     public Claims getExpiredTokenClaims() {
         try {
             getTokenClaims();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
+        } catch (InvalidTokenException e) {
+            if (!e.getAuthExceptionCode().equals(EXPIRED_TOKEN)) {
+                throw e;
+            }
+            return e.getExpiredTokenClaims();
         }
-        return null;
+
+        throw new NotExpiredTokenException();
     }
 
     /**
      * 토큰 유효성 검증
      */
     public boolean validate() {
-        try {
-            return this.getTokenClaims() != null;
-        } catch (ExpiredJwtException e) {
-            log.error("만료된 토큰입니다.");
-            throw e;
-        } catch (Exception e) {
-            log.error("유효하지 않은 토큰입니다.");
-            throw new TokenValidFailedException(INVALID_TOKEN.getMessage());
-        }
+        return getTokenClaims() != null;
     }
 }
