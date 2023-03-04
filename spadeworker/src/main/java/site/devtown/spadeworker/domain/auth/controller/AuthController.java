@@ -50,7 +50,7 @@ public class AuthController {
                 .map(Cookie::getValue)
                 .orElse((null));
 
-        Map<String, String> newTokens = jwtService.tokenReissue(accessToken, refreshToken);
+        Map<String, String> newTokens = jwtService.reissueToken(accessToken, refreshToken);
 
         int cookieMaxAge = (int) refreshTokenExpiry / 60;
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);

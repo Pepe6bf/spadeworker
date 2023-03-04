@@ -11,6 +11,7 @@ import site.devtown.spadeworker.domain.user.model.constant.UserStatus;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public record UserPrincipal(
@@ -54,7 +55,7 @@ public record UserPrincipal(
 
     @Override
     public String getPassword() {
-        return null;
+        return "";
     }
 
     @Override
@@ -89,7 +90,7 @@ public record UserPrincipal(
 
     @Override
     public Map<String, Object> getClaims() {
-        return null;
+        return Collections.EMPTY_MAP;
     }
 
     @Override
