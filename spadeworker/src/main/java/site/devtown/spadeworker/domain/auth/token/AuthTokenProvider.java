@@ -2,12 +2,12 @@ package site.devtown.spadeworker.domain.auth.token;
 
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 public class AuthTokenProvider {
@@ -35,7 +35,7 @@ public class AuthTokenProvider {
      */
     public AuthToken generateAccessToken(
             String personalId,
-            List<UserRoleType> roles
+            Collection<? extends GrantedAuthority> roles
     ) {
         return AuthToken.of(
                 personalId,
@@ -50,7 +50,7 @@ public class AuthTokenProvider {
      */
     public AuthToken generateRefreshToken(
             String personalId,
-            List<UserRoleType> roles
+            Collection<? extends GrantedAuthority> roles
     ) {
         return AuthToken.of(
                 personalId,

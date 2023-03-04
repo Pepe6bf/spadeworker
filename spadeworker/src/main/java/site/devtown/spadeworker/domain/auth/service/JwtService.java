@@ -14,14 +14,12 @@ import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepositor
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
 import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
 import site.devtown.spadeworker.domain.auth.token.UserRefreshToken;
-import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.repository.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -40,7 +38,7 @@ public class JwtService {
      */
     public AuthToken createAccessToken(
             String personalId,
-            List<UserRoleType> roles
+            Collection<? extends GrantedAuthority> roles
     ) {
         return tokenProvider.generateAccessToken(personalId, roles);
     }
@@ -50,7 +48,7 @@ public class JwtService {
      */
     public AuthToken createRefreshToken(
             String personalId,
-            List<UserRoleType> roles
+            Collection<? extends GrantedAuthority> roles
     ) {
         return tokenProvider.generateRefreshToken(personalId, roles);
     }
@@ -68,8 +66,9 @@ public class JwtService {
         Claims expiredTokenClaims = expiredAccessToken.getExpiredTokenClaims();
 
         String userId = expiredTokenClaims.getSubject();
-        UserRoleType roleType = UserRoleType.of(expiredTokenClaims.get("roles", String.class));
+        Collection<? extends GrantedAuthority> roles = getUserAuthority(expiredTokenClaims.get("roles", String.class));
 
+        // 리프레쉬 토큰 파싱
         AuthToken refreshToken = createAuthTokenFromRefreshTokenValue(refreshTokenValue);
 
         // refreshToken 검증
@@ -86,11 +85,11 @@ public class JwtService {
         ).orElseThrow(() -> new InvalidTokenException(INVALID_REFRESH_TOKEN));
 
         // 새로운 access token 발급
-        AuthToken newAccessToken = createAccessToken(userId, List.of(roleType));
+        AuthToken newAccessToken = createAccessToken(userId, roles);
 
         // Refresh Token Rotation
         // refresh 토큰 설정
-        AuthToken newRefreshToken = createRefreshToken(userId, List.of(roleType));
+        AuthToken newRefreshToken = createRefreshToken(userId, roles);
         // DB에 refresh 토큰 업데이트
         userRefreshToken.changeTokenValue(newRefreshToken.getTokenValue());
 
@@ -124,11 +123,10 @@ public class JwtService {
         // claims 값을 기반으로 사용자 Entity 조회
         User user = userRepository.findByPersonalId(claims.getSubject())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
+
         // claims 값을 기반으로 사용자의 권한 조회
-        Collection<GrantedAuthority> authorities = Arrays.stream(new String[]{claims.get("roles").toString()})
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-        UserPrincipal userPrincipal = UserPrincipal.from(user, authorities);
+        Collection<? extends GrantedAuthority> roles = getUserAuthority(claims.get("roles", String.class));
+        UserPrincipal userPrincipal = UserPrincipal.from(user, roles);
 
         return new UsernamePasswordAuthenticationToken(
                 userPrincipal,
@@ -149,5 +147,12 @@ public class JwtService {
      */
     public AuthToken createAuthTokenFromRefreshTokenValue(String refreshToken) {
         return tokenProvider.convertRefreshTokenToAuthToken(refreshToken);
+    }
+
+    // 토큰에서 파싱한 사용자 권한 리스트 문자열을 각각 분리해서 GrantedAuthority List 로 반환
+    private Collection<? extends GrantedAuthority> getUserAuthority(String userRoles) {
+        return Arrays.stream(userRoles.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }

@@ -78,14 +78,10 @@ public class CustomOAuth2UserService
         // 계정이 존재하지 않을 경우 회원 가입을 진행
         User user = userRepository.findByPersonalId(userInfo.getId())
                 .orElseGet(() -> createUser(userInfo, providerType));
-        // TODO : 아래 로직을 더 줄일 수 있는지 고민하고 리펙토링
         Collection<GrantedAuthority> authorities = userRoleRepository.findAllByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException("사용자 권한이 존재하지 않습니다."))
                 .stream()
-                .map(r -> r.getRole().getRoleType())
-                .toList()
-                .stream()
-                .map(r -> new SimpleGrantedAuthority(r.toString()))
+                .map(r -> new SimpleGrantedAuthority(r.getRole().getRoleType().getCode()))
                 .collect(Collectors.toList());
 
         // 회원 가입 된 계정의 로그인 유형과 현재 로그인 한 유형이 일치한지 검증
