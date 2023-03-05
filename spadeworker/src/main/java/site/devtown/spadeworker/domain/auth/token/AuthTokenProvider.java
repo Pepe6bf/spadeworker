@@ -14,8 +14,8 @@ public class AuthTokenProvider {
 
     private final Key accessTokenSecretKey;
     private final Key refreshTokenSecretKey;
-    private final Date accessTokenExpiry;
-    private final Date refreshTokenExpiry;
+    private final long accessTokenExpiry;
+    private final long refreshTokenExpiry;
 
     public AuthTokenProvider(
             String accessTokenSecretKey,
@@ -26,8 +26,8 @@ public class AuthTokenProvider {
     ) {
         this.accessTokenSecretKey = Keys.hmacShaKeyFor(accessTokenSecretKey.getBytes(StandardCharsets.UTF_8));
         this.refreshTokenSecretKey = Keys.hmacShaKeyFor(refreshTokenSecretKey.getBytes(StandardCharsets.UTF_8));
-        this.accessTokenExpiry = new Date(new Date().getTime() + accessTokenExpiry);
-        this.refreshTokenExpiry = new Date(new Date().getTime() + refreshTokenExpiry);
+        this.accessTokenExpiry = accessTokenExpiry;
+        this.refreshTokenExpiry = refreshTokenExpiry;
     }
 
     /**
@@ -40,7 +40,7 @@ public class AuthTokenProvider {
         return AuthToken.of(
                 personalId,
                 roles,
-                accessTokenExpiry,
+                new Date(new Date().getTime() + accessTokenExpiry),
                 accessTokenSecretKey
         );
     }
@@ -55,7 +55,7 @@ public class AuthTokenProvider {
         return AuthToken.of(
                 personalId,
                 roles,
-                refreshTokenExpiry,
+                new Date(new Date().getTime() + refreshTokenExpiry),
                 refreshTokenSecretKey
         );
     }
