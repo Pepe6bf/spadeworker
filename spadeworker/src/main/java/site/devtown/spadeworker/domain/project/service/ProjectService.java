@@ -204,12 +204,4 @@ public class ProjectService {
         // 이미지가 변경되지 않았을 경우
         return savedImageUri;
     }
-
-    // 특정 프로젝트 및 사용자의 좋아요가 있는지 조회
-    private boolean isProjectLikeExist(Project project, User user) {
-        return projectLikeRepository.existsByProjectAndUser(
-                project,
-                user
-        );
-    }
 }
