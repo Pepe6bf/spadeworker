@@ -112,4 +112,36 @@ public class ProjectController {
                 "성공적으로 프로젝트의 좋아요가 취소되었습니다."
         );
     }
+
+    /**
+     * 프로젝트 구독 API
+     */
+    @PostMapping("/{projectId}/subscribe")
+    public CommonResult registerProjectSubscribe(
+            @PathVariable Long projectId
+    ) {
+        // 프로젝트 구독
+        projectService.registerProjectSubscribe(projectId);
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "성공적으로 프로젝트에 구독되었습니다."
+        );
+    }
+
+    /**
+     * 프로젝트 구독 취소 API
+     */
+    @DeleteMapping("/{projectId}/subscribe")
+    public CommonResult cancelProjectSubscribe(
+            @PathVariable Long projectId
+    ) {
+        // 프로젝트 구독 취소
+        projectService.cancelProjectSubscribe(projectId);
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "성공적으로 프로젝트의 구독이 취소되었습니다."
+        );
+    }
 }
