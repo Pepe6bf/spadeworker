@@ -11,6 +11,10 @@ import site.devtown.spadeworker.domain.project.dto.CreateProjectRequest;
 import site.devtown.spadeworker.domain.project.dto.ProjectDto;
 import site.devtown.spadeworker.domain.project.dto.UpdateProjectRequest;
 import site.devtown.spadeworker.domain.project.entity.Project;
+import site.devtown.spadeworker.domain.project.entity.ProjectLike;
+import site.devtown.spadeworker.domain.project.exception.ProjectDuplicateLikeException;
+import site.devtown.spadeworker.domain.project.exception.ProjectLikeNotFoundException;
+import site.devtown.spadeworker.domain.project.repository.ProjectLikeRepository;
 import site.devtown.spadeworker.domain.project.repository.ProjectRepository;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.service.UserService;
@@ -35,6 +39,7 @@ import static site.devtown.spadeworker.domain.project.exception.ProjectException
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectLikeRepository projectLikeRepository;
     private final ImageFileService imageFileService;
     private final UserService userService;
 
@@ -115,6 +120,45 @@ public class ProjectService {
         return savedProject.getId();
     }
 
+    /**
+     * 프로젝트 좋아요 등록 비즈니스 로직
+     */
+    public void registerProjectLike(Long projectId) {
+
+        Project savedProject = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException(PROJECT_NOT_FOUND));
+        User currentAuthorizedUser = userService.getCurrentAuthorizedUser();
+
+        // 이미 요청자의 좋아요가 프로젝트에 등록되어 있다면 예외 발생
+        if (projectLikeRepository.existsByProjectAndUser(
+                savedProject,
+                currentAuthorizedUser)
+        ) {
+            throw new ProjectDuplicateLikeException();
+        }
+
+        // 프로젝트에 좋아요 등록
+        projectLikeRepository.saveAndFlush(
+                ProjectLike.of(savedProject, currentAuthorizedUser)
+        );
+    }
+
+    /**
+     * 프로젝트 좋아요 취소 비즈니스 로직
+     */
+    public void cancelProjectLike(Long projectId) {
+        Project savedProject = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException(PROJECT_NOT_FOUND));
+        User currentAuthorizedUser = userService.getCurrentAuthorizedUser();
+
+        // 프로젝트에 요청자의 좋아요가 없으면 예외 발생
+        ProjectLike savedProjectLike = projectLikeRepository.findByProjectAndUser(savedProject, currentAuthorizedUser)
+                .orElseThrow(ProjectLikeNotFoundException::new);
+
+        // 프로젝트 좋아요 취소
+        projectLikeRepository.delete(savedProjectLike);
+    }
+
     // 프로젝트 소유자와 현재 인가된 사용자가 동일한지 검증
     private void validateProjectOwner(User owner) {
         if (!Objects.equals(owner, userService.getCurrentAuthorizedUser())) {
@@ -159,5 +203,13 @@ public class ProjectService {
 
         // 이미지가 변경되지 않았을 경우
         return savedImageUri;
+    }
+
+    // 특정 프로젝트 및 사용자의 좋아요가 있는지 조회
+    private boolean isProjectLikeExist(Project project, User user) {
+        return projectLikeRepository.existsByProjectAndUser(
+                project,
+                user
+        );
     }
 }
