@@ -10,15 +10,23 @@ public record ProjectDto(
         String title,
         String description,
         String thumbnailImageUri,
+        int likeCount,
+        int subscriberCount,
         UserInfo user,
         LocalDateTime createdAt
 ) {
-    public static ProjectDto from(Project project) {
+    public static ProjectDto from(
+            Project project,
+            int likeCount,
+            int subscriberCount
+    ) {
         return new ProjectDto(
                 project.getId(),
                 project.getTitle(),
                 project.getDescription(),
                 project.getThumbnailImageUri(),
+                likeCount,
+                subscriberCount,
                 UserInfo.from(project.getUser()),
                 project.getCreatedAt()
         );
