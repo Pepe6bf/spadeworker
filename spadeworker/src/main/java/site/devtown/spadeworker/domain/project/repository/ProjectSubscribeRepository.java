@@ -13,4 +13,6 @@ public interface ProjectSubscribeRepository
     Boolean existsByProjectAndSubscriber(Project project, User subscriber);
 
     Optional<ProjectSubscribe> findByProjectAndSubscriber(Project project, User subscriber);
+
+    int countAllByProject(Project project);
 }
