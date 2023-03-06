@@ -6,6 +6,7 @@ import site.devtown.spadeworker.domain.project.dto.CreateProjectRequest;
 import site.devtown.spadeworker.domain.project.dto.ProjectDto;
 import site.devtown.spadeworker.domain.project.dto.UpdateProjectRequest;
 import site.devtown.spadeworker.domain.project.service.ProjectService;
+import site.devtown.spadeworker.global.response.CommonResult;
 import site.devtown.spadeworker.global.response.ListResult;
 import site.devtown.spadeworker.global.response.ResponseService;
 import site.devtown.spadeworker.global.response.SingleResult;
@@ -77,6 +78,70 @@ public class ProjectController {
                         projectId,
                         request
                 )
+        );
+    }
+
+    /**
+     * 프로젝트 좋아요 등록 API
+     */
+    @PostMapping("/{projectId}/like")
+    public CommonResult registerProjectLike(
+            @PathVariable Long projectId
+    ) {
+        // 프로젝트에 좋아요 등록
+        projectService.registerProjectLike(projectId);
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "성공적으로 프로젝트에 좋아요가 등록되었습니다."
+        );
+    }
+
+    /**
+     * 프로젝트 좋아요 취소 API
+     */
+    @DeleteMapping("/{projectId}/like")
+    public CommonResult cancelProjectLike(
+            @PathVariable Long projectId
+    ) {
+        // 프로젝트의 좋아요 취소
+        projectService.cancelProjectLike(projectId);
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "성공적으로 프로젝트의 좋아요가 취소되었습니다."
+        );
+    }
+
+    /**
+     * 프로젝트 구독 API
+     */
+    @PostMapping("/{projectId}/subscribe")
+    public CommonResult registerProjectSubscribe(
+            @PathVariable Long projectId
+    ) {
+        // 프로젝트 구독
+        projectService.registerProjectSubscribe(projectId);
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "성공적으로 프로젝트에 구독되었습니다."
+        );
+    }
+
+    /**
+     * 프로젝트 구독 취소 API
+     */
+    @DeleteMapping("/{projectId}/subscribe")
+    public CommonResult cancelProjectSubscribe(
+            @PathVariable Long projectId
+    ) {
+        // 프로젝트 구독 취소
+        projectService.cancelProjectSubscribe(projectId);
+
+        return responseService.getSuccessResult(
+                OK.value(),
+                "성공적으로 프로젝트의 구독이 취소되었습니다."
         );
     }
 }
