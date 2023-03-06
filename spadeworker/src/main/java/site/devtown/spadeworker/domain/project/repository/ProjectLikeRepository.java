@@ -13,4 +13,6 @@ public interface ProjectLikeRepository
     Boolean existsByProjectAndUser(Project project, User user);
 
     Optional<ProjectLike> findByProjectAndUser(Project project, User user);
+
+    int countAllByProject(Project project);
 }
