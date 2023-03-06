@@ -60,7 +60,11 @@ public class ProjectService {
     public List<ProjectDto> getAllProjects() {
         return projectRepository.findAll()
                 .stream()
-                .map(ProjectDto::from)
+                .map(p -> ProjectDto.from(
+                        p,
+                        projectLikeRepository.countAllByProject(p),
+                        projectSubscribeRepository.countAllByProject(p))
+                )
                 .toList();
     }
 
@@ -72,7 +76,11 @@ public class ProjectService {
             Long projectId
     ) {
         return projectRepository.findById(projectId)
-                .map(ProjectDto::from)
+                .map(p -> ProjectDto.from(
+                        p,
+                        projectLikeRepository.countAllByProject(p),
+                        projectSubscribeRepository.countAllByProject(p))
+                )
                 .orElseThrow(
                         () -> new ResourceNotFoundException(PROJECT_NOT_FOUND)
                 );
