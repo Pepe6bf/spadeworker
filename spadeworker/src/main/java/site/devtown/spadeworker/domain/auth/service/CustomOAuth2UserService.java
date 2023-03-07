@@ -17,7 +17,6 @@ import site.devtown.spadeworker.domain.auth.model.info.OAuth2UserInfo;
 import site.devtown.spadeworker.domain.auth.model.info.OAuth2UserInfoFactory;
 import site.devtown.spadeworker.domain.user.model.constant.AuthProviderType;
 import site.devtown.spadeworker.domain.user.model.constant.UserRoleType;
-import site.devtown.spadeworker.domain.user.model.constant.UserStatus;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.model.entity.UserRole;
 import site.devtown.spadeworker.domain.user.repository.RoleRepository;
@@ -107,8 +106,7 @@ public class CustomOAuth2UserService
                         generatePassword(),
                         userInfo.getName(),
                         userInfo.getEmail(),
-                        providerType,
-                        UserStatus.ACTIVE
+                        providerType
                 )
         );
 
