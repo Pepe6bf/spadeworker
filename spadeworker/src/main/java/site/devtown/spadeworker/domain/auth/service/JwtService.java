@@ -14,19 +14,17 @@ import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepositor
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
 import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
 import site.devtown.spadeworker.domain.auth.token.UserRefreshToken;
-import site.devtown.spadeworker.domain.user.exception.UserExceptionCode;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.repository.UserRepository;
 import site.devtown.spadeworker.global.exception.ResourceNotFoundException;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.INVALID_REFRESH_TOKEN;
-import static site.devtown.spadeworker.domain.user.exception.UserExceptionCode.*;
+import static site.devtown.spadeworker.domain.user.exception.UserExceptionCode.USER_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
