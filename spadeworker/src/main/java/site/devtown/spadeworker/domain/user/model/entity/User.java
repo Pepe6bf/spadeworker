@@ -9,6 +9,8 @@ import site.devtown.spadeworker.global.config.audit.BaseTimeEntity;
 
 import javax.persistence.*;
 
+import static site.devtown.spadeworker.domain.user.model.constant.UserStatus.*;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -35,7 +37,7 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
-    private UserStatus status;
+    private UserStatus status = ACTIVE;
 
     @Column(length = 1000, nullable = false)
     private String profileImageUri =
@@ -51,15 +53,13 @@ public class User extends BaseTimeEntity {
             String password,
             String nickname,
             String email,
-            AuthProviderType providerType,
-            UserStatus status
+            AuthProviderType providerType
     ) {
         this.personalId = personalId;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.providerType = providerType;
-        this.status = status;
     }
 
     public static User of(
@@ -67,16 +67,14 @@ public class User extends BaseTimeEntity {
             String password,
             String nickname,
             String email,
-            AuthProviderType providerType,
-            UserStatus status
+            AuthProviderType providerType
     ) {
         return new User(
                 personalId,
                 password,
                 nickname,
                 email,
-                providerType,
-                status
+                providerType
         );
     }
 }
