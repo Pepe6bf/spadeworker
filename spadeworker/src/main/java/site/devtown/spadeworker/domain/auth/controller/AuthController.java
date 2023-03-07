@@ -6,6 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.devtown.spadeworker.domain.auth.dto.ReissueTokenResponse;
 import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
 import site.devtown.spadeworker.domain.auth.service.JwtService;
 import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
@@ -40,8 +41,11 @@ public class AuthController {
 
     private final static String REFRESH_TOKEN = "refresh_token";
 
+    /**
+     * 인증 토큰 재발급 API
+     */
     @GetMapping("/refresh")
-    public SingleResult<String> reissueToken(
+    public SingleResult<ReissueTokenResponse> reissueToken(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
@@ -71,11 +75,14 @@ public class AuthController {
 
         return responseService.getSingleResult(
                 OK.value(),
-                "재발급되었습니다.",
-                newTokens.get("accessToken")
+                "성공적으로 토큰이 재발급되었습니다.",
+                ReissueTokenResponse.of(newTokens.get("accessToken"))
         );
     }
 
+    /**
+     * 로그아웃 API
+     */
     @GetMapping("/logout")
     public CommonResult logout(
             HttpServletRequest request
