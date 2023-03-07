@@ -14,8 +14,10 @@ import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepositor
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
 import site.devtown.spadeworker.domain.auth.token.AuthTokenProvider;
 import site.devtown.spadeworker.domain.auth.token.UserRefreshToken;
+import site.devtown.spadeworker.domain.user.exception.UserExceptionCode;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.repository.UserRepository;
+import site.devtown.spadeworker.global.exception.ResourceNotFoundException;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static site.devtown.spadeworker.domain.auth.exception.AuthExceptionCode.INVALID_REFRESH_TOKEN;
+import static site.devtown.spadeworker.domain.user.exception.UserExceptionCode.*;
 
 @RequiredArgsConstructor
 @Service
@@ -114,15 +117,17 @@ public class JwtService {
     /**
      * JWT 값을 기반으로 사용자 인가 조회
      */
+    @Transactional(readOnly = true)
     public Authentication getAuthentication(AuthToken accessToken) {
         // access token 검증
         accessToken.validate();
 
         // access token claims 조회
         Claims claims = accessToken.getTokenClaims();
+
         // claims 값을 기반으로 사용자 Entity 조회
         User user = userRepository.findByPersonalId(claims.getSubject())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
         // claims 값을 기반으로 사용자의 권한 조회
         Collection<? extends GrantedAuthority> roles = getUserAuthority(claims.get("roles", String.class));
