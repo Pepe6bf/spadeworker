@@ -20,6 +20,7 @@ import site.devtown.spadeworker.domain.auth.repository.OAuth2AuthorizationReques
 import site.devtown.spadeworker.domain.auth.service.JwtService;
 
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 @RequiredArgsConstructor
 @Configuration
@@ -52,7 +53,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 // AUTH API
-                .antMatchers(GET, "/api/auth/refresh").permitAll()
+                .antMatchers(POST, "/api/auth/refresh").permitAll()
                 // Project API
                 .antMatchers(GET, "/api/projects/**").permitAll()
                 // 나머지는 모두 인증 필요
