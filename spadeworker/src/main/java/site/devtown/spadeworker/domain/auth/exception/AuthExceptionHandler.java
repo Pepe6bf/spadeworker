@@ -62,6 +62,21 @@ public class AuthExceptionHandler {
     }
 
     /**
+     * LoggedUserNotFoundException 핸들링
+     * Custom Exception
+     */
+    @ExceptionHandler(LoggedUserNotFoundException.class)
+    protected ResponseEntity<ExceptionResponse> handleLoggedUserNotFoundException(
+            LoggedUserNotFoundException e
+    ) {
+        log.error("handle LoggedUserNotFoundException");
+        return new ResponseEntity<>(
+                ExceptionResponse.of(LOGGED_USER_NOT_FOUND, e.getMessage()),
+                HttpStatus.valueOf(LOGGED_USER_NOT_FOUND.getHttpStatus().value())
+        );
+    }
+
+    /**
      * AuthenticationException 핸들링
      * Built-in Exception
      */
