@@ -51,7 +51,10 @@ public class SecurityConfig {
         http
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                // AUTH API
                 .antMatchers(GET, "/api/auth/refresh").permitAll()
+                // Project API
+                .antMatchers(GET, "/api/projects/**").permitAll()
                 // 나머지는 모두 인증 필요
                 .anyRequest().authenticated();
 

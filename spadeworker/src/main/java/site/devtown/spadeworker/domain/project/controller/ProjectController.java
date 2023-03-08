@@ -53,13 +53,16 @@ public class ProjectController {
      * 프로젝트 생성 API
      */
     @PostMapping()
-    public SingleResult<Long> createProject(
+    public CommonResult createProject(
             @ModelAttribute @Valid CreateProjectRequest request
     ) throws Exception {
-        return responseService.getSingleResult(
+
+        // 프로젝트 생성 비즈니스 로직 수행
+        projectService.createProject(request);
+
+        return responseService.getSuccessResult(
                 OK.value(),
-                "성공적으로 프로젝트가 생성되었습니다.",
-                projectService.createProject(request)
+                "성공적으로 프로젝트가 생성되었습니다."
         );
     }
 
@@ -67,17 +70,17 @@ public class ProjectController {
      * 프로젝트 수정 API
      */
     @PatchMapping("/{projectId}")
-    public SingleResult<Long> updateProject(
+    public CommonResult updateProject(
             @PathVariable Long projectId,
             @ModelAttribute @Valid UpdateProjectRequest request
     ) throws Exception {
-        return responseService.getSingleResult(
+
+        // 프로젝트 수정 비즈니스 로직 수행
+        projectService.updateProject(projectId, request);
+
+        return responseService.getSuccessResult(
                 OK.value(),
-                "성공적으로 프로젝트가 수정되었습니다.",
-                projectService.updateProject(
-                        projectId,
-                        request
-                )
+                "성공적으로 프로젝트가 수정되었습니다."
         );
     }
 
