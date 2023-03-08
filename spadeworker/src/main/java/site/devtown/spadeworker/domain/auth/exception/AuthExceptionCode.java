@@ -30,6 +30,7 @@ public enum AuthExceptionCode
      */
     OAUTH_PROVIDER_MISMATCH(BAD_REQUEST, "AT-C-100", "일치하지 않는 인증 제공자 입니다."),
     INVALID_USER_ROLE(FORBIDDEN, "AT-C-101", "유효하지 않은 사용자 권한입니다."),
+    LOGGED_USER_NOT_FOUND(NOT_FOUND, "AT-C-102", "현재 로그인 중이지 않습니다."),
 
     /**
      * Common Exception

@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
+import site.devtown.spadeworker.domain.auth.exception.LoggedUserNotFoundException;
 import site.devtown.spadeworker.domain.auth.model.UserPrincipal;
 import site.devtown.spadeworker.domain.auth.repository.UserRefreshTokenRepository;
 import site.devtown.spadeworker.domain.auth.token.AuthToken;
@@ -108,6 +109,11 @@ public class JwtService {
         AuthToken accessAuthToken = createAuthTokenFromAccessTokenValue(accessToken);
         String userPersonalId = accessAuthToken.getTokenClaims().getSubject();
 
+        // 현재 사용자가 로그인 중이지 않다면 예외 출력
+        if (!isUserLoggedIn(userPersonalId)) {
+            throw new LoggedUserNotFoundException();
+        }
+
         // refresh token 삭제
         userRefreshTokenRepository.deleteAllByPersonalId(userPersonalId);
     }
@@ -157,5 +163,10 @@ public class JwtService {
         return Arrays.stream(userRoles.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+    }
+
+    // 현재 사용자가 로그인 중인지 체크하는 메소드
+    private boolean isUserLoggedIn(String userPersonalId) {
+        return userRefreshTokenRepository.existsByPersonalId(userPersonalId);
     }
 }

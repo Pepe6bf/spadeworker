@@ -13,4 +13,6 @@ public interface UserRefreshTokenRepository
     Optional<UserRefreshToken> findByPersonalIdAndTokenValue(String personalId, String token);
 
     void deleteAllByPersonalId(String personalId);
+
+    boolean existsByPersonalId(String personalId);
 }
