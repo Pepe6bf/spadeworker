@@ -89,7 +89,7 @@ public class ProjectService {
     /**
      * 프로젝트 생성 비즈니스 로직
      */
-    public Long createProject(
+    public void createProject(
             CreateProjectRequest request
     ) throws Exception {
 
@@ -101,13 +101,13 @@ public class ProjectService {
         );
 
         // create 로직 진행
-        return projectRepository.save(project).getId();
+        projectRepository.save(project);
     }
 
     /**
      * 프로젝트 수정 비즈니스 로직
      */
-    public Long updateProject(
+    public void updateProject(
             Long projectId,
             UpdateProjectRequest request
     ) throws Exception {
@@ -129,8 +129,6 @@ public class ProjectService {
                         savedProject.getThumbnailImageUri()
                 )
         );
-
-        return savedProject.getId();
     }
 
     /**
