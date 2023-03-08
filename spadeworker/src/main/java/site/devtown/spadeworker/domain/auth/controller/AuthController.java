@@ -3,9 +3,7 @@ package site.devtown.spadeworker.domain.auth.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import site.devtown.spadeworker.domain.auth.dto.ReissueTokenResponse;
 import site.devtown.spadeworker.domain.auth.exception.InvalidTokenException;
 import site.devtown.spadeworker.domain.auth.service.JwtService;
@@ -44,7 +42,7 @@ public class AuthController {
     /**
      * 인증 토큰 재발급 API
      */
-    @GetMapping("/refresh")
+    @PostMapping("/refresh")
     public SingleResult<ReissueTokenResponse> reissueToken(
             HttpServletRequest request,
             HttpServletResponse response
@@ -83,7 +81,7 @@ public class AuthController {
     /**
      * 로그아웃 API
      */
-    @GetMapping("/logout")
+    @DeleteMapping("/logout")
     public CommonResult logout(
             HttpServletRequest request
     ) {
