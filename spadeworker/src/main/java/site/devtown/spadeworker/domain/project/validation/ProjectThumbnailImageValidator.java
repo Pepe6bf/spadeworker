@@ -30,6 +30,14 @@ public class ProjectThumbnailImageValidator
             MultipartFile uploadImage,
             ConstraintValidatorContext context
     ) {
+        // 프로필 썸네일이 Null 인지 체크
+        if (uploadImage == null) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("프로필 썸네일은 필수 값 입니다.")
+                    .addConstraintViolation();
+            return false;
+        }
+
         // 이미지 확장자 검증
         if (!validateImageExtension(ImageUtil.getImageExtension(uploadImage.getOriginalFilename()))) {
             context.disableDefaultConstraintViolation();
