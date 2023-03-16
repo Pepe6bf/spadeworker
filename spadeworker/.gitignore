@@ -225,11 +225,13 @@ src/main/resources/jwt.yml
 
 ### yml ###
 src/main/resources/application-dev.yml
+src/test/resources/application-test.yml
 
 ### Auth Properties ###
 src/main/resources/oauth.properties
 
 ### Init Data for DB ###
 src/main/resources/data.sql
+src/test/resources/data.sql
 
 # End of https://www.toptal.com/developers/gitignore/api/java,gradle,intellij+all,visualstudiocode,macos,windows
