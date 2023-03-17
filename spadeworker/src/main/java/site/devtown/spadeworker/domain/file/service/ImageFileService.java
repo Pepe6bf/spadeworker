@@ -4,6 +4,18 @@ import org.springframework.web.multipart.MultipartFile;
 import site.devtown.spadeworker.domain.file.constant.ImageFileType;
 
 public interface ImageFileService {
+
+    String saveImage(
+            ImageFileType imageFileType,
+            MultipartFile fileData
+    ) throws Exception;
+
+    String updateImage(
+            ImageFileType imageFileType,
+            MultipartFile fileData,
+            String savedImageUri
+    ) throws Exception;
+
     String uploadFile(
             ImageFileType imageFileType,
             MultipartFile fileData

@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import site.devtown.spadeworker.domain.file.constant.ImageFileType;
 import site.devtown.spadeworker.domain.file.exception.ImageFileNotFoundException;
 import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
+import site.devtown.spadeworker.global.util.ImageUtil;
 
 import java.io.File;
 import java.util.Objects;
@@ -22,6 +23,68 @@ public class LocalImageFileService
 
     @Value("${image.local-image-storage-location}")
     private String localFileStorageLocation;
+    @Value("${image.project-thumbnail-image.default-image-name}")
+    private String localStorageDefaultProjectThumbnailImageName;
+    @Value("${image.project-thumbnail-image.default-image-uri}")
+    private String localStorageDefaultProjectThumbnailImageUri;
+
+    @Override
+    public String saveImage(
+            ImageFileType imageFileType,
+            MultipartFile fileData
+    ) throws Exception {
+        String localStorageDefaultImageUri = "";
+        String localStorageDefaultImageName = "";
+
+        switch (imageFileType) {
+            case ARTICLE_THUMBNAIL_IMAGE -> {
+                localStorageDefaultImageUri = localStorageDefaultProjectThumbnailImageUri;
+                localStorageDefaultImageName = localStorageDefaultProjectThumbnailImageName;
+            }
+        }
+
+        return (!Objects.equals(fileData.getOriginalFilename(), localStorageDefaultImageName)) ?
+                uploadFile(imageFileType, fileData) :
+                localStorageDefaultImageUri;
+    }
+
+    @Override
+    public String updateImage(
+            ImageFileType imageFileType,
+            MultipartFile fileData,
+            String savedImageUri
+    ) throws Exception {
+        String savedImageName = ImageUtil.getLocalStorageImageName(savedImageUri);
+        String requestImageName = fileData.getOriginalFilename();
+        String localStorageDefaultImageUri = "";
+        String localStorageDefaultImageName = "";
+
+        switch (imageFileType) {
+            case PROJECT_THUMBNAIL_IMAGE -> {
+                localStorageDefaultImageUri = localStorageDefaultProjectThumbnailImageUri;
+                localStorageDefaultImageName = localStorageDefaultProjectThumbnailImageName;
+            }
+        }
+
+        // 사용자가 기존 이미지를 삭제하고 디폴트 이미지로 설정할 경우
+        if (
+                (Objects.equals(requestImageName, localStorageDefaultImageName)) &&
+                        (!savedImageName.equals(localStorageDefaultImageName))
+        ) {
+            deleteFile(savedImageUri);
+            return localStorageDefaultImageUri;
+
+        } else if (!Objects.equals(requestImageName, savedImageName)) {  // 사용자가 이미지 변경을 요청했을 경우 {
+            deleteFile(savedImageUri);
+            return uploadFile(
+                    imageFileType,
+                    fileData
+            );
+        }
+
+        // 이미지가 변경되지 않았을 경우
+        return savedImageUri;
+    }
 
     @Override
     public String uploadFile(
