@@ -32,10 +32,6 @@ import static site.devtown.spadeworker.domain.project.exception.ProjectException
 import static site.devtown.spadeworker.domain.project.exception.ProjectExceptionCode.PROJECT_NOT_FOUND;
 
 @RequiredArgsConstructor
-@PropertySource(
-        value = "classpath:/upload-resource-rule.yml",
-        factory = YamlPropertySourceFactory.class
-)
 @Transactional
 @Service
 public class ProjectService {
