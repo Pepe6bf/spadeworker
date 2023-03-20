@@ -1,20 +1,14 @@
 package site.devtown.spadeworker.domain.project.validation;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
 import site.devtown.spadeworker.global.util.ImageUtil;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 
-@PropertySource(
-        value = "classpath:/upload-resource-rule.yml",
-        factory = YamlPropertySourceFactory.class
-)
 @Component
 public class ProjectThumbnailImageValidator
         implements ConstraintValidator<ProjectThumbnailImageValidate, MultipartFile> {
