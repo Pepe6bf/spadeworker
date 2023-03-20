@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import site.devtown.spadeworker.domain.file.service.ImageFileService;
 import site.devtown.spadeworker.domain.project.dto.CreateProjectRequest;
@@ -19,11 +18,7 @@ import site.devtown.spadeworker.domain.project.repository.ProjectRepository;
 import site.devtown.spadeworker.domain.project.repository.ProjectSubscribeRepository;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.service.UserService;
-import site.devtown.spadeworker.global.util.fixture.ProjectFixture;
-import site.devtown.spadeworker.global.util.fixture.UserFixture;
 
-import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +27,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
 import static site.devtown.spadeworker.domain.file.constant.ImageFileType.PROJECT_THUMBNAIL_IMAGE;
+import static site.devtown.spadeworker.global.util.fixture.ProjectFixture.*;
+import static site.devtown.spadeworker.global.util.fixture.UserFixture.getUserEntity;
 
-@DisplayName("비즈니스 로직 - Project(게시판)")
+@DisplayName("[비즈니스 로직] - Project(게시판)")
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
@@ -50,11 +47,11 @@ class ProjectServiceTest {
     @Mock
     private UserService userService;
 
-    @DisplayName("성공 테스트 - 프로젝트 전체 조회")
+    @DisplayName("[성공 테스트] - 프로젝트 전체 조회")
     @Test
     void success_get_all_projects() throws Exception {
         // Given
-        List<Project> projects = getProjects();
+        List<Project> projects = getProjects(10);
 
         given(projectRepository.findAll())
                 .willReturn(projects);
@@ -70,7 +67,7 @@ class ProjectServiceTest {
         then(projectRepository).should().findAll();
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 단건 조회")
+    @DisplayName("[성공 테스트] - 프로젝트 단건 조회")
     @Test
     void success_get_project() throws Exception {
         // Given
@@ -87,13 +84,13 @@ class ProjectServiceTest {
         then(projectRepository).should().findById(projectId);
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 생성")
+    @DisplayName("[성공 테스트] - 프로젝트 생성")
     @Test
     void success_create_project() throws Exception {
         // Given
-        CreateProjectRequest request = createRequest();
-        Project project = createProject(request);
-        User user = UserFixture.getUserEntity();
+        CreateProjectRequest request = getCreateProjectRequest();
+        User user = getUserEntity();
+        Project project = getProject(request, user);
 
         given(imageFileService.saveImage(
                 eq(PROJECT_THUMBNAIL_IMAGE),
@@ -112,12 +109,12 @@ class ProjectServiceTest {
         then(projectRepository).should().save(any(Project.class));
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 수정")
+    @DisplayName("[성공 테스트] - 프로젝트 수정")
     @Test
     void success_update_project() throws Exception {
         // Given
         Long projectId = 1L;
-        UpdateProjectRequest request = updateRequest();
+        UpdateProjectRequest request = getUpdateProjectRequest();
         Project savedProject = getProject();
 
         given(projectRepository.findById(projectId))
@@ -141,13 +138,13 @@ class ProjectServiceTest {
                 .hasFieldOrPropertyWithValue("thumbnailImageUri", request.thumbnailImage().getOriginalFilename());
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 좋아요 등록")
+    @DisplayName("[성공 테스트] - 프로젝트 좋아요 등록")
     @Test
     void success_register_project_like() throws Exception {
         // Given
         Long projectId = 1L;
         Project savedProject = getProject();
-        User user = UserFixture.getUserEntity();
+        User user = getUserEntity();
         ProjectLike projectLike = ProjectLike.of(savedProject, user);
 
         given(projectRepository.findById(projectId))
@@ -169,13 +166,13 @@ class ProjectServiceTest {
         then(projectLikeRepository).should().saveAndFlush(any(ProjectLike.class));
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 좋아요 취소")
+    @DisplayName("[성공 테스트] - 프로젝트 좋아요 취소")
     @Test
     void success_cancel_project_like() throws Exception {
         // Given
         Long projectId = 1L;
         Project savedProject = getProject();
-        User user = UserFixture.getUserEntity();
+        User user = getUserEntity();
         ProjectLike savedProjectLike = ProjectLike.of(savedProject, user);
 
         given(projectRepository.findById(projectId))
@@ -193,13 +190,13 @@ class ProjectServiceTest {
         then(projectLikeRepository).should().delete(savedProjectLike);
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 구독 등록")
+    @DisplayName("[성공 테스트] - 프로젝트 구독 등록")
     @Test
     void success_register_project_subscribe() throws Exception {
         // Given
         Long projectId = 1L;
         Project savedProject = getProject();
-        User user = UserFixture.getUserEntity();
+        User user = getUserEntity();
         ProjectSubscribe projectSubscribe = ProjectSubscribe.of(savedProject, user);
 
         given(projectRepository.findById(projectId))
@@ -221,13 +218,13 @@ class ProjectServiceTest {
         then(projectSubscribeRepository).should().saveAndFlush(any(ProjectSubscribe.class));
     }
 
-    @DisplayName("성공 테스트 - 프로젝트 구독 취소")
+    @DisplayName("[성공 테스트] - 프로젝트 구독 취소")
     @Test
     void success_cancel_project_subscribe() throws Exception {
         // Given
         Long projectId = 1L;
         Project savedProject = getProject();
-        User user = UserFixture.getUserEntity();
+        User user = getUserEntity();
         ProjectSubscribe projectSubscribe = ProjectSubscribe.of(savedProject, user);
 
         given(projectRepository.findById(projectId))
@@ -246,70 +243,5 @@ class ProjectServiceTest {
 
         // Then
         then(projectSubscribeRepository).should().delete(projectSubscribe);
-    }
-
-    private CreateProjectRequest createRequest()
-            throws Exception {
-        return ProjectFixture.getCreateProjectRequest(
-                new MockMultipartFile(
-                        "image",
-                        "java.png",
-                        "image/png",
-                        new FileInputStream(getClass().getResource("/images/java.png").getFile())
-                )
-        );
-    }
-
-    private UpdateProjectRequest updateRequest()
-            throws Exception {
-        return ProjectFixture.getUpdateProjectRequest(
-                new MockMultipartFile(
-                        "image",
-                        "js.png",
-                        "image/png",
-                        new FileInputStream(getClass().getResource("/images/js.png").getFile())
-                )
-        );
-    }
-
-    private Project createProject(
-            CreateProjectRequest request
-    ) {
-        return ProjectFixture.getProjectEntity(
-                request.title(),
-                request.description(),
-                request.thumbnailImage().getOriginalFilename(),
-                UserFixture.getUserEntity()
-        );
-    }
-
-    private Project updateProject(
-            UpdateProjectRequest request
-    ) {
-        return ProjectFixture.getProjectEntity(
-                request.title(),
-                request.description(),
-                request.thumbnailImage().getOriginalFilename(),
-                UserFixture.getUserEntity()
-        );
-    }
-
-    private Project getProject() {
-        return ProjectFixture.getProjectEntity(
-                "old title",
-                "old description",
-                "old=image-uri",
-                UserFixture.getUserEntity()
-        );
-    }
-
-    private List<Project> getProjects() {
-        ArrayList<Project> projects = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            projects.add(getProject());
-        }
-
-        return projects;
     }
 }
