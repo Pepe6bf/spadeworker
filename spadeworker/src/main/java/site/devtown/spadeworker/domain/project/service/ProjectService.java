@@ -1,7 +1,6 @@
 package site.devtown.spadeworker.domain.project.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.devtown.spadeworker.domain.file.service.ImageFileService;
@@ -22,7 +21,6 @@ import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.service.UserService;
 import site.devtown.spadeworker.global.exception.InvalidResourceOwnerException;
 import site.devtown.spadeworker.global.exception.ResourceNotFoundException;
-import site.devtown.spadeworker.global.factory.YamlPropertySourceFactory;
 
 import java.util.List;
 import java.util.Objects;
