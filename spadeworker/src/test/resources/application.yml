@@ -46,3 +46,11 @@ spring:
           tokenUri:
           userInfoUri:
           userNameAttribute:
+
+image:
+  local-image-storage-location:
+  allow-extensions:
+  project-thumbnail-image:
+    default-image-name:
+    default-image-uri:
+    limit-size:
