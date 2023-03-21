@@ -9,6 +9,18 @@ import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "article_hashtag",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "article-hashtag-unique",
+                        columnNames = {
+                                "hashtag_id",
+                                "article_id"
+                        }
+                )
+        }
+)
 @Entity
 public class ArticleHashtag
         extends BaseTimeEntity {
