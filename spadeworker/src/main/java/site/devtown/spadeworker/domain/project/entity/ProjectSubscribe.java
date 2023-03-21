@@ -1,6 +1,5 @@
 package site.devtown.spadeworker.domain.project.entity;
 
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,18 @@ import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "project_subscribe",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "project-subscriber-unique",
+                        columnNames = {
+                                "project_id",
+                                "subscriber_id"
+                        }
+                )
+        }
+)
 @Entity
 public class ProjectSubscribe extends BaseTimeEntity {
 
