@@ -24,12 +24,18 @@ public class ProjectThumbnailImageValidator
             MultipartFile uploadImage,
             ConstraintValidatorContext context
     ) {
+
         // 프로필 썸네일이 Null 인지 체크
         if (uploadImage == null) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("프로필 썸네일은 필수 값 입니다.")
                     .addConstraintViolation();
             return false;
+        }
+
+        // 입력 값으로 넘어온 이미지가 빈 값일 경우 기본 이미지를 사용한다고 판단
+        if (uploadImage.isEmpty()) {
+            return true;
         }
 
         // 이미지 확장자 검증
