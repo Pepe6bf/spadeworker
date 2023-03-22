@@ -28,16 +28,14 @@ public class LocalImageFileService
             MultipartFile fileData
     ) throws Exception {
         String localStorageDefaultImageUri = "";
-        String localStorageDefaultImageName = "";
 
         switch (imageFileType) {
-            case ARTICLE_THUMBNAIL_IMAGE -> {
+            case PROJECT_THUMBNAIL_IMAGE -> {
                 localStorageDefaultImageUri = localStorageDefaultProjectThumbnailImageUri;
-                localStorageDefaultImageName = localStorageDefaultProjectThumbnailImageName;
             }
         }
 
-        return (!Objects.equals(fileData.getOriginalFilename(), localStorageDefaultImageName)) ?
+        return !fileData.isEmpty() ?
                 uploadFile(imageFileType, fileData) :
                 localStorageDefaultImageUri;
     }
@@ -60,16 +58,19 @@ public class LocalImageFileService
             }
         }
 
-        // 사용자가 기존 이미지를 삭제하고 디폴트 이미지로 설정할 경우
-        if (
-                (Objects.equals(requestImageName, localStorageDefaultImageName)) &&
-                        (!savedImageName.equals(localStorageDefaultImageName))
-        ) {
-            deleteFile(savedImageUri);
+        // 사용자가 기본 이미지를 선택한 경우
+        if (fileData.isEmpty()) {
+            // 현재 저장된 이미지가 기본 이미지가 아닌 경우
+            if (!savedImageName.equals(localStorageDefaultImageName))
+                deleteFile(savedImageUri);
+
             return localStorageDefaultImageUri;
 
-        } else if (!Objects.equals(requestImageName, savedImageName)) {  // 사용자가 이미지 변경을 요청했을 경우 {
-            deleteFile(savedImageUri);
+        } else if (!requestImageName.equals(savedImageName)) {  // 사용자가 이미지 변경을 요청했을 경우
+            // 기존 이미지가 기본 이미지가 아닐 경우에만 삭제
+            if (!savedImageName.equals(localStorageDefaultImageName))
+                deleteFile(savedImageUri);
+
             return uploadFile(
                     imageFileType,
                     fileData
