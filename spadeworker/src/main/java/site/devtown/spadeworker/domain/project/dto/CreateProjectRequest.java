@@ -17,7 +17,7 @@ public record CreateProjectRequest(
         @Length(min = 1, max = 500, message = "프로젝트 설명 길이 제한은 1이상 500이하 입니다.")
         String description,
 
-        @ProjectThumbnailImageValidate
+        @ThumbnailImageValidate
         MultipartFile thumbnailImage
 ) {
 }

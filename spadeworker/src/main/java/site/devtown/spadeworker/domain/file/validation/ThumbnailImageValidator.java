@@ -1,4 +1,4 @@
-package site.devtown.spadeworker.domain.project.validation;
+package site.devtown.spadeworker.domain.file.validation;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,8 +10,8 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 
 @Component
-public class ProjectThumbnailImageValidator
-        implements ConstraintValidator<ProjectThumbnailImageValidate, MultipartFile> {
+public class ThumbnailImageValidator
+        implements ConstraintValidator<ThumbnailImageValidate, MultipartFile> {
 
     @Value("${image.allow-extensions}")
     private List<String> allowImageExtensions;
@@ -58,7 +58,7 @@ public class ProjectThumbnailImageValidator
     }
 
     @Override
-    public void initialize(ProjectThumbnailImageValidate constraintAnnotation) {
+    public void initialize(ThumbnailImageValidate constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
