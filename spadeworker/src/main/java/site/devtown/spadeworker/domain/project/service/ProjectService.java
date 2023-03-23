@@ -10,10 +10,7 @@ import site.devtown.spadeworker.domain.project.dto.UpdateProjectRequest;
 import site.devtown.spadeworker.domain.project.entity.Project;
 import site.devtown.spadeworker.domain.project.entity.ProjectLike;
 import site.devtown.spadeworker.domain.project.entity.ProjectSubscribe;
-import site.devtown.spadeworker.domain.project.exception.ProjectDuplicateLikeException;
-import site.devtown.spadeworker.domain.project.exception.ProjectDuplicateSubscribeException;
-import site.devtown.spadeworker.domain.project.exception.ProjectLikeNotFoundException;
-import site.devtown.spadeworker.domain.project.exception.ProjectSubscribeNotFoundException;
+import site.devtown.spadeworker.domain.project.exception.*;
 import site.devtown.spadeworker.domain.project.repository.ProjectLikeRepository;
 import site.devtown.spadeworker.domain.project.repository.ProjectRepository;
 import site.devtown.spadeworker.domain.project.repository.ProjectSubscribeRepository;
@@ -79,6 +76,8 @@ public class ProjectService {
             CreateProjectRequest request
     ) throws Exception {
 
+        duplicateProjectTitleValidate(request.title());
+
         Project project = Project.of(
                 request.title(),
                 request.description(),
@@ -108,6 +107,9 @@ public class ProjectService {
 
         // 현재 인증된 사용자의 리소스가 맞는지 검증
         validateProjectOwner(savedProject.getUser());
+
+        if (!request.title().equals(savedProject.getTitle()))
+            duplicateProjectTitleValidate(request.title());
 
         // update 로직 진행
         savedProject.update(
@@ -204,4 +206,10 @@ public class ProjectService {
             throw new InvalidResourceOwnerException(INVALID_PROJECT_OWNER);
         }
     }
+
+    private void duplicateProjectTitleValidate(String projectTitle) {
+        if (projectRepository.existsByTitle(projectTitle))
+            throw new DuplicateProjectTitleException();
+    }
+
 }
