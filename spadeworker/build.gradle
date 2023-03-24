@@ -34,7 +34,7 @@ dependencies {
 	implementation 'com.google.code.gson:gson:2.10.1'
 
 	// AWS S3
-	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation group: 'io.awspring.cloud', name: 'spring-cloud-starter-aws', version: '2.4.4'
 
 	compileOnly 'org.projectlombok:lombok'
 
