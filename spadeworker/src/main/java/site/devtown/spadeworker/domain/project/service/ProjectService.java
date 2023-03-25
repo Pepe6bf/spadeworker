@@ -3,7 +3,7 @@ package site.devtown.spadeworker.domain.project.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.devtown.spadeworker.domain.file.service.ImageFileService;
+import site.devtown.spadeworker.domain.file.service.AmazonS3ImageService;
 import site.devtown.spadeworker.domain.project.dto.CreateProjectRequest;
 import site.devtown.spadeworker.domain.project.dto.ProjectDto;
 import site.devtown.spadeworker.domain.project.dto.UpdateProjectRequest;
@@ -33,7 +33,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectLikeRepository projectLikeRepository;
     private final ProjectSubscribeRepository projectSubscribeRepository;
-    private final ImageFileService imageFileService;
+    private final AmazonS3ImageService amazonS3ImageService;
     private final UserService userService;
 
     /**
@@ -81,7 +81,7 @@ public class ProjectService {
         Project project = Project.of(
                 request.title(),
                 request.description(),
-                imageFileService.saveImage(
+                amazonS3ImageService.saveThumbnailImage(
                         PROJECT_THUMBNAIL_IMAGE,
                         request.thumbnailImage()
                 ),
@@ -115,7 +115,7 @@ public class ProjectService {
         savedProject.update(
                 request.title(),
                 request.description(),
-                imageFileService.updateImage(
+                amazonS3ImageService.updateThumbnailImage(
                         PROJECT_THUMBNAIL_IMAGE,
                         request.thumbnailImage(),
                         savedProject.getThumbnailImageUri()
