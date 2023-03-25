@@ -40,26 +40,25 @@ public class User extends BaseTimeEntity {
     private UserStatus status = ACTIVE;
 
     @Column(length = 1000, nullable = false)
-    private String profileImageUri =
-            "/Users/kmo/toy-project/spadeworker-project/local-storage/images"
-                    + "/user-profile"
-                    + "/user-profile_default.jpg";
+    private String profileImagePath;
 
     @Column(length = 1000)
-    private String introduce = null;
+    private String introduce = "";
 
     private User(
             String personalId,
             String password,
             String nickname,
             String email,
-            AuthProviderType providerType
+            AuthProviderType providerType,
+            String profileImagePath
     ) {
         this.personalId = personalId;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.providerType = providerType;
+        this.profileImagePath = profileImagePath;
     }
 
     public static User of(
@@ -67,14 +66,16 @@ public class User extends BaseTimeEntity {
             String password,
             String nickname,
             String email,
-            AuthProviderType providerType
+            AuthProviderType providerType,
+            String profileImagePath
     ) {
         return new User(
                 personalId,
                 password,
                 nickname,
                 email,
-                providerType
+                providerType,
+                profileImagePath
         );
     }
 }

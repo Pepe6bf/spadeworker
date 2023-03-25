@@ -35,7 +35,8 @@ public class UserFixture {
                 password,
                 nickname,
                 email,
-                providerType
+                providerType,
+                "default-user-profile-image-path"
         );
     }
 }

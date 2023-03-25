@@ -2,6 +2,7 @@ package site.devtown.spadeworker.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +42,9 @@ public class CustomOAuth2UserService
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${image.user-profile-image.default-image-path}")
+    private String defaultUserProfileImagePath;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest)
@@ -106,7 +110,8 @@ public class CustomOAuth2UserService
                         generatePassword(),
                         userInfo.getName(),
                         userInfo.getEmail(),
-                        providerType
+                        providerType,
+                        defaultUserProfileImagePath
                 )
         );
 
