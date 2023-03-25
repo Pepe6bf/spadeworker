@@ -6,7 +6,11 @@ public class ImageUtil {
         return imageFileName.substring(imageFileName.lastIndexOf(".") + 1);
     }
 
-    public static String getLocalStorageImageName(String localStorageImageUri) {
+    public static String getStoredImageName(String localStorageImageUri) {
         return localStorageImageUri.substring(localStorageImageUri.lastIndexOf("/") + 1);
+    }
+
+    public static String getStoredImageResourcePath(String storedImageFullPath) {
+        return storedImageFullPath.substring(storedImageFullPath.lastIndexOf(".com/") + 5);
     }
 }
