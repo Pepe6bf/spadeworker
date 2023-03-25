@@ -34,7 +34,7 @@ public record UserDto(
         return new UserDto(
                 user.getNickname(),
                 user.getEmail(),
-                user.getProfileImageUri(),
+                user.getProfileImagePath(),
                 user.getIntroduce(),
                 user.getProviderType().toString(),
                 user.getCreatedAt()
