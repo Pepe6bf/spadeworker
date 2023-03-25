@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import site.devtown.spadeworker.domain.file.service.ImageFileService;
+import site.devtown.spadeworker.domain.file.service.AmazonS3ImageService;
 import site.devtown.spadeworker.domain.project.dto.CreateProjectRequest;
 import site.devtown.spadeworker.domain.project.dto.UpdateProjectRequest;
 import site.devtown.spadeworker.domain.project.entity.Project;
@@ -43,7 +43,7 @@ class ProjectServiceTest {
     @Mock
     private ProjectSubscribeRepository projectSubscribeRepository;
     @Mock
-    private ImageFileService imageFileService;
+    private AmazonS3ImageService imageService;
     @Mock
     private UserService userService;
 
@@ -92,7 +92,7 @@ class ProjectServiceTest {
         User user = getUserEntity();
         Project project = getProject(request, user);
 
-        given(imageFileService.saveImage(
+        given(imageService.saveThumbnailImage(
                 eq(PROJECT_THUMBNAIL_IMAGE),
                 any(MultipartFile.class))
         )
@@ -121,7 +121,7 @@ class ProjectServiceTest {
                 .willReturn(Optional.of(savedProject));
         given(userService.getCurrentAuthorizedUser())
                 .willReturn(savedProject.getUser());
-        given(imageFileService.updateImage(
+        given(imageService.updateThumbnailImage(
                 eq(PROJECT_THUMBNAIL_IMAGE),
                 eq(request.thumbnailImage()),
                 eq(savedProject.getThumbnailImageUri())
