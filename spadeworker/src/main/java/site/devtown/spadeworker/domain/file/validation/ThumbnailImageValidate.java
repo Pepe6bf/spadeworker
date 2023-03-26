@@ -4,7 +4,7 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
 
-@Target(ElementType.FIELD)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 @Constraint(validatedBy = ThumbnailImageValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
