@@ -63,10 +63,10 @@ cloud:
 # Image File Rule & Info
 image:
   allow-extensions:
+  limit-size:
   user-profile-image:
     default-image-name:
     default-image-path:
   project-thumbnail-image:
     default-image-name:
     default-image-path:
-    limit-size:
