@@ -38,9 +38,9 @@ public class ProjectController {
     /**
      * 특정 프로젝트 단건 조회 API
      */
-    @GetMapping("/{projectId}")
+    @GetMapping("/{project-id}")
     public SingleResult<ProjectDto> getProject(
-            @PathVariable Long projectId
+            @PathVariable("project-id") Long projectId
     ) {
         return responseService.getSingleResult(
                 OK.value(),
@@ -69,9 +69,9 @@ public class ProjectController {
     /**
      * 프로젝트 수정 API
      */
-    @PatchMapping("/{projectId}")
+    @PatchMapping("/{project-id}")
     public CommonResult updateProject(
-            @PathVariable Long projectId,
+            @PathVariable("project-id") Long projectId,
             @ModelAttribute @Valid UpdateProjectRequest request
     ) throws Exception {
 
@@ -87,9 +87,9 @@ public class ProjectController {
     /**
      * 프로젝트 좋아요 등록 API
      */
-    @PostMapping("/{projectId}/like")
+    @PostMapping("/{project-id}/like")
     public CommonResult registerProjectLike(
-            @PathVariable Long projectId
+            @PathVariable("project-id") Long projectId
     ) {
         // 프로젝트에 좋아요 등록
         projectService.registerProjectLike(projectId);
@@ -103,9 +103,9 @@ public class ProjectController {
     /**
      * 프로젝트 좋아요 취소 API
      */
-    @DeleteMapping("/{projectId}/like")
+    @DeleteMapping("/{project-id}/like")
     public CommonResult cancelProjectLike(
-            @PathVariable Long projectId
+            @PathVariable("project-id") Long projectId
     ) {
         // 프로젝트의 좋아요 취소
         projectService.cancelProjectLike(projectId);
@@ -119,9 +119,9 @@ public class ProjectController {
     /**
      * 프로젝트 구독 API
      */
-    @PostMapping("/{projectId}/subscribe")
+    @PostMapping("/{project-id}/subscribe")
     public CommonResult registerProjectSubscribe(
-            @PathVariable Long projectId
+            @PathVariable("project-id") Long projectId
     ) {
         // 프로젝트 구독
         projectService.registerProjectSubscribe(projectId);
@@ -135,9 +135,9 @@ public class ProjectController {
     /**
      * 프로젝트 구독 취소 API
      */
-    @DeleteMapping("/{projectId}/subscribe")
+    @DeleteMapping("/{project-id}/subscribe")
     public CommonResult cancelProjectSubscribe(
-            @PathVariable Long projectId
+            @PathVariable("project-id") Long projectId
     ) {
         // 프로젝트 구독 취소
         projectService.cancelProjectSubscribe(projectId);
