@@ -42,4 +42,23 @@ public class ArticleController {
                 )
         );
     }
+
+    /**
+     * 게시글 본문 이미지 업로드 API
+     */
+    @PostMapping("/temp-articles/{tempArticleId}/article-content-images")
+    public SingleResult<UploadContentImageResponse> saveArticleContentImage(
+            @PathVariable Long tempArticleId,
+            @ModelAttribute @Valid @ContentImageValidate UploadContentImageRequest request
+    ) throws Exception {
+
+        return responseService.getSingleResult(
+                OK.value(),
+                "게시글 컨텐츠 이미지가 성공적으로 업로드 되었습니다.",
+                articleService.saveArticleContentImage(
+                        tempArticleId,
+                        request.image()
+                )
+        );
+    }
 }

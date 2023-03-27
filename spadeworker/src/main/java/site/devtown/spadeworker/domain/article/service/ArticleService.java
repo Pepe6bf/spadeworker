@@ -94,4 +94,34 @@ public class ArticleService {
                 }
         );
     }
+
+    /**
+     * 게시글 컨텐츠 이미지 업로드 비즈니스 로직
+     */
+    public UploadContentImageResponse saveArticleContentImage(
+            Long tempArticleId,
+            MultipartFile requestImage
+    ) throws IOException {
+
+        // S3 에 게시글 본문 이미지 업로드
+        String storedImageFullPath = amazonS3ImageService.uploadImage(
+                ARTICLE_CONTENT_IMAGE,
+                requestImage
+        );
+
+        TempArticle tempArticle = tempArticleRepository.findById(tempArticleId)
+                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
+
+        tempArticleContentImageRepository.save(
+                TempArticleContentImage.of(
+                        storedImageFullPath,
+                        tempArticle
+                )
+        );
+
+        return UploadContentImageResponse.of(
+                requestImage.getOriginalFilename(),
+                storedImageFullPath
+        );
+    }
 }
