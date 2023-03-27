@@ -27,9 +27,9 @@ public class ArticleController {
     /**
      * 임시 게시글 저장 API
      */
-    @PutMapping({"/temp-articles", "/temp-articles/{tempArticleId}"})
+    @PutMapping({"/temp-articles", "/temp-articles/{temp-article-id}"})
     public SingleResult<SaveTempArticleResponse> createTempArticle(
-            @PathVariable Optional<Long> tempArticleId,
+            @PathVariable("temp-article-id") Optional<Long> tempArticleId,
             @RequestBody @Valid SaveTempArticleRequest request
     ) {
 
@@ -46,9 +46,9 @@ public class ArticleController {
     /**
      * 게시글 본문 이미지 업로드 API
      */
-    @PostMapping("/temp-articles/{tempArticleId}/article-content-images")
+    @PostMapping("/temp-articles/{temp-article-id}/article-content-images")
     public SingleResult<UploadContentImageResponse> saveArticleContentImage(
-            @PathVariable Long tempArticleId,
+            @PathVariable("temp-article-id") Long tempArticleId,
             @ModelAttribute @Valid @ContentImageValidate UploadContentImageRequest request
     ) throws Exception {
 
