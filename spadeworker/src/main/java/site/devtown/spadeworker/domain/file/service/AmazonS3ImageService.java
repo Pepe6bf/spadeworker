@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
+import static site.devtown.spadeworker.global.util.ImageUtil.*;
+
 @RequiredArgsConstructor
 @Service
 public class AmazonS3ImageService {
@@ -60,7 +62,7 @@ public class AmazonS3ImageService {
             String storedImageFullPath
     ) throws Exception {
         String storedImageName = ImageUtil.getStoredImageName(storedImageFullPath);
-        String storedImageResourcePath = ImageUtil.getStoredImageResourcePath(storedImageFullPath);
+        String storedImageResourcePath = getStoredImageResourcePath(storedImageFullPath);
         String requestImageName = imageFile.getOriginalFilename();
         String defaultThumbnailImagePath = "";
         String defaultThumbnailImageName = "";
@@ -139,13 +141,18 @@ public class AmazonS3ImageService {
             String storedImageFullPath
     ) {
 
+        String storedImageResourcePath = getStoredImageResourcePath(storedImageFullPath);
+
         // 삭제할 파일이 존재하는지 검증
-        if (!amazonS3Client.doesObjectExist(bucketName, storedImageFullPath))
+        if (!amazonS3Client.doesObjectExist(
+                bucketName,
+                storedImageResourcePath
+        ))
             throw new ImageFileNotFoundException();
 
         amazonS3Client.deleteObject(
                 bucketName,
-                storedImageFullPath
+                storedImageResourcePath
         );
     }
 
