@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import site.devtown.spadeworker.domain.article.dto.SaveTempArticleRequest;
 import site.devtown.spadeworker.domain.article.dto.SaveTempArticleResponse;
+import site.devtown.spadeworker.domain.article.dto.TempArticleDto;
 import site.devtown.spadeworker.domain.article.model.entity.TempArticle;
 import site.devtown.spadeworker.domain.article.model.entity.TempArticleContentImage;
 import site.devtown.spadeworker.domain.article.model.entity.TempArticleHashtag;
@@ -15,12 +16,15 @@ import site.devtown.spadeworker.domain.article.repository.TempArticleHashtagRepo
 import site.devtown.spadeworker.domain.article.repository.TempArticleRepository;
 import site.devtown.spadeworker.domain.file.dto.UploadContentImageResponse;
 import site.devtown.spadeworker.domain.file.service.AmazonS3ImageService;
+import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.service.UserService;
 import site.devtown.spadeworker.global.exception.ResourceNotFoundException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static site.devtown.spadeworker.domain.article.exception.ArticleExceptionCode.TEMP_ARTICLE_NOT_FOUND;
 import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICLE_CONTENT_IMAGE;
@@ -74,9 +78,7 @@ public class ArticleService {
         return SaveTempArticleResponse.of(tempArticle.getId());
     }
 
-    /**
-     * 임시 게시글의 해시태그를 업데이트
-     */
+    // 임시 게시글의 해시태그를 업데이트
     private void updateTempArticleHashtags(
             Set<String> hashtags,
             TempArticle tempArticle
@@ -123,5 +125,74 @@ public class ArticleService {
                 requestImage.getOriginalFilename(),
                 storedImageFullPath
         );
+    }
+
+    /**
+     * 임시 게시글 전체 조회
+     */
+    public List<TempArticleDto> getTempArticles() {
+        User currentAuthorizedUser = userService.getCurrentAuthorizedUser();
+
+        return tempArticleRepository.findAllByUser(currentAuthorizedUser)
+                .stream().map(
+                        tempArticle -> {
+                            Set<String> hashtags = tempArticleHashtagRepository.findAllByTempArticle(tempArticle)
+                                    .stream().map(TempArticleHashtag::getTitle).collect(Collectors.toSet());
+                            return TempArticleDto.from(
+                                    tempArticle,
+                                    hashtags
+                            );
+                        }
+                ).toList();
+    }
+
+    /**
+     * 임시 게시글 단건 조회
+     */
+    public TempArticleDto getTempArticle(
+            Long tempArticleId
+    ) {
+        TempArticle tempArticle = tempArticleRepository.findById(tempArticleId)
+                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
+
+        return TempArticleDto.from(
+                tempArticle,
+                tempArticleHashtagRepository.findAllByTempArticle(tempArticle)
+                        .stream().map(TempArticleHashtag::getTitle).collect(Collectors.toSet())
+        );
+    }
+
+    /**
+     * 임시 게시글 삭제
+     */
+    public void deleteTempArticle(
+            Long tempArticleId
+    ) {
+        TempArticle tempArticle = tempArticleRepository.findById(tempArticleId)
+                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
+
+        deleteAllTempArticleHashtags(tempArticle);
+        deleteAllTempArticleContentImages(tempArticle);
+    }
+
+    // 임시 게시글에 연관된 해시태그 전체 삭제
+    private void deleteAllTempArticleHashtags(
+            TempArticle tempArticle
+    ) {
+        tempArticleHashtagRepository.deleteAllByTempArticle(tempArticle);
+    }
+
+    // 임시 게시글에 연관된 본문 이미지 전체 삭제
+    private void deleteAllTempArticleContentImages(
+            TempArticle tempArticle
+    ) {
+        tempArticleContentImageRepository.findAllByTempArticle(tempArticle)
+                .forEach(tempArticleContentImage -> {
+                    // S3에 존재하는 이미지 삭제
+                    amazonS3ImageService.deleteImage(tempArticleContentImage.getImagePath());
+
+                    // DB에 존재하는 이미지 정보 삭제
+                    tempArticleContentImageRepository.delete(tempArticleContentImage);
+                });
     }
 }
