@@ -6,6 +6,7 @@ import java.util.List;
 
 @Service
 public class ResponseService {
+
     /**
      * 단일건 성공 결과를 처리하는 메소드
      */
