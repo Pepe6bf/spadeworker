@@ -3,6 +3,7 @@ package site.devtown.spadeworker.domain.article.model.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.devtown.spadeworker.domain.article.model.constant.ArticleStatus;
 import site.devtown.spadeworker.domain.project.entity.Project;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.global.config.audit.BaseEntity;
@@ -25,11 +26,12 @@ public class Article
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(length = 500, nullable = false)
-    private String thumbnailImageUri;
+    @Column(length = 1000, nullable = false)
+    private String thumbnailImagePath;
 
-    @Column(nullable = false)
-    private Boolean isOpen;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100, nullable = false)
+    private ArticleStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Project project;
