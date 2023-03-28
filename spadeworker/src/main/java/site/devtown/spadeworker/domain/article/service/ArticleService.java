@@ -130,6 +130,7 @@ public class ArticleService {
     /**
      * 임시 게시글 전체 조회
      */
+    @Transactional(readOnly = true)
     public List<TempArticleDto> getTempArticles() {
         User currentAuthorizedUser = userService.getCurrentAuthorizedUser();
 
@@ -149,6 +150,7 @@ public class ArticleService {
     /**
      * 임시 게시글 단건 조회
      */
+    @Transactional(readOnly = true)
     public TempArticleDto getTempArticle(
             Long tempArticleId
     ) {
@@ -173,6 +175,7 @@ public class ArticleService {
 
         deleteAllTempArticleHashtags(tempArticle);
         deleteAllTempArticleContentImages(tempArticle);
+        tempArticleRepository.delete(tempArticle);
     }
 
     // 임시 게시글에 연관된 해시태그 전체 삭제
