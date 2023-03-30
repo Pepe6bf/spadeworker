@@ -34,4 +34,22 @@ public class ArticleHashtag
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Article article;
+
+    private ArticleHashtag(
+            Hashtag hashtag,
+            Article article
+    ) {
+        this.hashtag = hashtag;
+        this.article = article;
+    }
+
+    public static ArticleHashtag of(
+            Hashtag hashtag,
+            Article article
+    ) {
+        return new ArticleHashtag(
+                hashtag,
+                article
+        );
+    }
 }
