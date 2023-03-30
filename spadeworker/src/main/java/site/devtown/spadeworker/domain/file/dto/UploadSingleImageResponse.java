@@ -1,14 +1,14 @@
 package site.devtown.spadeworker.domain.file.dto;
 
-public record UploadContentImageResponse(
+public record UploadSingleImageResponse(
         String originalFileName,
         String storedImageFullPath
 ) {
 
-    public static UploadContentImageResponse of(
+    public static UploadSingleImageResponse of(
             String originalFileName,
             String storedImageFullPath
     ) {
-        return new UploadContentImageResponse(originalFileName, storedImageFullPath);
+        return new UploadSingleImageResponse(originalFileName, storedImageFullPath);
     }
 }
