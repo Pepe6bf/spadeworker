@@ -17,7 +17,9 @@ public enum ArticleExceptionCode
     ARTICLE_EMOTION_NOT_FOUND(NOT_FOUND, "AC-C-003", "게시글에 해당 사용자의 반응이 존재하지 않습니다."),
     ARTICLE_DUPLICATE_SCRAP(BAD_REQUEST, "AC-C-004", "이미 해당 게시물을 스크랩 중 입니다."),
     NOT_SCRAPED_ARTICLE(BAD_REQUEST, "AC-C-005", "스크랩 중이 아닌 게시글입니다."),
-    TEMP_ARTICLE_NOT_FOUND(NOT_FOUND, "AC-C-006", "존재하지 않는 임시 게시글입니다.");
+    TEMP_ARTICLE_NOT_FOUND(NOT_FOUND, "AC-C-006", "존재하지 않는 임시 게시글입니다."),
+    HASHTAG_NOT_FOUND(NOT_FOUND, "AC-C-007", "존재하지 않는 해시태그입니다."),
+    TEMP_ARTICLE_THUMBNAIL_IMAGE_NOT_FOUND(NOT_FOUND, "AC-C-008", "존재하지 않는 게시글 썸네일 이미지 입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
