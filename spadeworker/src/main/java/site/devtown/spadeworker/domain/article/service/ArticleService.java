@@ -1,33 +1,27 @@
 package site.devtown.spadeworker.domain.article.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import site.devtown.spadeworker.domain.article.dto.SaveTempArticleRequest;
-import site.devtown.spadeworker.domain.article.dto.SaveTempArticleResponse;
-import site.devtown.spadeworker.domain.article.dto.TempArticleDto;
-import site.devtown.spadeworker.domain.article.model.entity.TempArticle;
-import site.devtown.spadeworker.domain.article.model.entity.TempArticleContentImage;
-import site.devtown.spadeworker.domain.article.model.entity.TempArticleHashtag;
-import site.devtown.spadeworker.domain.article.repository.ArticleRepository;
-import site.devtown.spadeworker.domain.article.repository.TempArticleContentImageRepository;
-import site.devtown.spadeworker.domain.article.repository.TempArticleHashtagRepository;
-import site.devtown.spadeworker.domain.article.repository.TempArticleRepository;
-import site.devtown.spadeworker.domain.file.dto.UploadContentImageResponse;
+import site.devtown.spadeworker.domain.article.dto.CreateArticleRequest;
+import site.devtown.spadeworker.domain.article.dto.CreateArticleResponse;
+import site.devtown.spadeworker.domain.article.model.entity.*;
+import site.devtown.spadeworker.domain.article.repository.*;
+import site.devtown.spadeworker.domain.file.dto.UploadSingleImageResponse;
 import site.devtown.spadeworker.domain.file.service.AmazonS3ImageService;
-import site.devtown.spadeworker.domain.user.model.entity.User;
+import site.devtown.spadeworker.domain.project.service.ProjectService;
 import site.devtown.spadeworker.domain.user.service.UserService;
 import site.devtown.spadeworker.global.exception.ResourceNotFoundException;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static site.devtown.spadeworker.domain.article.exception.ArticleExceptionCode.TEMP_ARTICLE_NOT_FOUND;
+import static site.devtown.spadeworker.domain.article.exception.ArticleExceptionCode.HASHTAG_NOT_FOUND;
 import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICLE_CONTENT_IMAGE;
+import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICLE_THUMBNAIL_IMAGE;
 
 @RequiredArgsConstructor
 @Transactional
@@ -35,72 +29,21 @@ import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICL
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final TempArticleRepository tempArticleRepository;
-    private final TempArticleContentImageRepository tempArticleContentImageRepository;
-    private final TempArticleHashtagRepository tempArticleHashtagRepository;
-    private final AmazonS3ImageService amazonS3ImageService;
+    private final ArticleContentImageRepository articleContentImageRepository;
+    private final HashtagRepository hashtagRepository;
+    private final ArticleHashtagRepository articleHashtagRepository;
     private final UserService userService;
+    private final AmazonS3ImageService amazonS3ImageService;
+    private final ProjectService projectService;
+    private final TempArticleService tempArticleService;
 
-    /**
-     * 임시 게시글 저장 비즈니스 로직
-     */
-    public SaveTempArticleResponse saveTempArticle(
-            Optional<Long> tempArticleId,
-            SaveTempArticleRequest request
-    ) {
-
-        TempArticle tempArticle;
-
-        // tempArticleId 가 존재하지 않을 경우 임시 게시글을 처음 생성하는 것으로 판단
-        if (tempArticleId.isEmpty()) {
-            tempArticle = tempArticleRepository.save(
-                    TempArticle.of(
-                            request.title(),
-                            request.content(),
-                            userService.getCurrentAuthorizedUser()
-                    )
-            );
-        } else {
-            tempArticle = tempArticleRepository.findById(tempArticleId.get())
-                    .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
-
-            tempArticle.update(
-                    request.title(),
-                    request.content()
-            );
-        }
-
-        updateTempArticleHashtags(
-                request.hashtags(),
-                tempArticle
-        );
-
-        return SaveTempArticleResponse.of(tempArticle.getId());
-    }
-
-    // 임시 게시글의 해시태그를 업데이트
-    private void updateTempArticleHashtags(
-            Set<String> hashtags,
-            TempArticle tempArticle
-    ) {
-
-        // 기존 해시태그 제거
-        tempArticleHashtagRepository.deleteAllByTempArticle(tempArticle);
-
-        // 해시태그 업데이트
-        hashtags.forEach(
-                t -> {
-                    tempArticleHashtagRepository.save(
-                            TempArticleHashtag.of(t, tempArticle)
-                    );
-                }
-        );
-    }
+    @Value("${image.article-thumbnail-image.default-image-path}")
+    private String defaultArticleThumbnailImagePath;
 
     /**
      * 게시글 컨텐츠 이미지 업로드 비즈니스 로직
      */
-    public UploadContentImageResponse saveArticleContentImage(
+    public UploadSingleImageResponse saveArticleContentImage(
             Long tempArticleId,
             MultipartFile requestImage
     ) throws IOException {
@@ -111,91 +54,153 @@ public class ArticleService {
                 requestImage
         );
 
-        TempArticle tempArticle = tempArticleRepository.findById(tempArticleId)
-                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
-
-        tempArticleContentImageRepository.save(
-                TempArticleContentImage.of(
-                        storedImageFullPath,
-                        tempArticle
-                )
+        tempArticleService.saveTempArticleContentImage(
+                storedImageFullPath,
+                tempArticleId
         );
 
-        return UploadContentImageResponse.of(
+        return UploadSingleImageResponse.of(
                 requestImage.getOriginalFilename(),
                 storedImageFullPath
         );
     }
 
     /**
-     * 임시 게시글 전체 조회
+     * 게시글 썸네일 이미지 업로드 비즈니스 로직
      */
-    @Transactional(readOnly = true)
-    public List<TempArticleDto> getTempArticles() {
-        User currentAuthorizedUser = userService.getCurrentAuthorizedUser();
+    public UploadSingleImageResponse uploadArticleThumbnailImage(
+            Long tempArticleId,
+            MultipartFile requestImage
+    ) throws IOException {
 
-        return tempArticleRepository.findAllByUser(currentAuthorizedUser)
-                .stream().map(
-                        tempArticle -> {
-                            Set<String> hashtags = tempArticleHashtagRepository.findAllByTempArticle(tempArticle)
-                                    .stream().map(TempArticleHashtag::getTitle).collect(Collectors.toSet());
-                            return TempArticleDto.from(
-                                    tempArticle,
-                                    hashtags
-                            );
-                        }
-                ).toList();
-    }
+        TempArticle tempArticle = tempArticleService.getTempArticleEntity(tempArticleId);
 
-    /**
-     * 임시 게시글 단건 조회
-     */
-    @Transactional(readOnly = true)
-    public TempArticleDto getTempArticle(
-            Long tempArticleId
-    ) {
-        TempArticle tempArticle = tempArticleRepository.findById(tempArticleId)
-                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
+        tempArticleService.deleteTempArticleThumbnailImageWithS3(tempArticle.getId());
 
-        return TempArticleDto.from(
-                tempArticle,
-                tempArticleHashtagRepository.findAllByTempArticle(tempArticle)
-                        .stream().map(TempArticleHashtag::getTitle).collect(Collectors.toSet())
+        // S3 에 게시글 본문 이미지 업로드
+        String storedImageFullPath = amazonS3ImageService.uploadImage(
+                ARTICLE_THUMBNAIL_IMAGE,
+                requestImage
+        );
+
+        tempArticleService.saveTempArticleThumbnailImage(storedImageFullPath, tempArticle);
+
+        return UploadSingleImageResponse.of(
+                requestImage.getOriginalFilename(),
+                storedImageFullPath
         );
     }
 
     /**
-     * 임시 게시글 삭제
+     * 게시글 생성 비즈니스 로직
      */
-    public void deleteTempArticle(
-            Long tempArticleId
+    public CreateArticleResponse createArticle(
+            Long tempArticleId,
+            CreateArticleRequest request
     ) {
-        TempArticle tempArticle = tempArticleRepository.findById(tempArticleId)
-                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
 
-        deleteAllTempArticleHashtags(tempArticle);
-        deleteAllTempArticleContentImages(tempArticle);
-        tempArticleRepository.delete(tempArticle);
+        TempArticle tempArticle = tempArticleService.getTempArticleEntity(tempArticleId);
+        // Article Entity 생성
+        Article article = articleRepository.save(
+                Article.of(
+                        request.title(),
+                        request.content(),
+                        getArticleThumbnailImagePath(tempArticle),
+                        request.status(),
+                        projectService.getProjectEntity(request.projectId()),
+                        userService.getCurrentAuthorizedUser()
+                )
+        );
+
+        saveTempArticleContentImageToArticleContentImage(
+                tempArticle,
+                article
+        );
+
+        saveArticleHashtags(
+                request.hashtags(),
+                article
+        );
+
+        // 임시 게시글 및 관련 정보 제거
+        tempArticleService.clearTempArticle(tempArticle);
+
+        return CreateArticleResponse.of(
+                article.getId()
+        );
     }
 
-    // 임시 게시글에 연관된 해시태그 전체 삭제
-    private void deleteAllTempArticleHashtags(
+    // 게시글 썸네일 이미지 설정
+    private String getArticleThumbnailImagePath(
             TempArticle tempArticle
     ) {
-        tempArticleHashtagRepository.deleteAllByTempArticle(tempArticle);
+        Optional<TempArticleThumbnailImage> tempArticleThumbnailImage
+                = tempArticleService.getTempArticleThumbnailImage(tempArticle);
+
+        return (tempArticleThumbnailImage.isPresent()) ?
+                tempArticleThumbnailImage.get().getImagePath() :
+                defaultArticleThumbnailImagePath;
     }
 
-    // 임시 게시글에 연관된 본문 이미지 전체 삭제
-    private void deleteAllTempArticleContentImages(
-            TempArticle tempArticle
+    // 임시 게시글 본문 이미지를 모두 본 게시글로 이동
+    public void saveTempArticleContentImageToArticleContentImage(
+            TempArticle tempArticle,
+            Article article
     ) {
-        tempArticleContentImageRepository.findAllByTempArticle(tempArticle)
-                .forEach(tempArticleContentImage -> {
-                    // S3에 존재하는 이미지 삭제
-                    amazonS3ImageService.deleteImage(tempArticleContentImage.getImagePath());
+        tempArticleService.getTempArticleContentImages(tempArticle)
+                .forEach(
+                        tempImage -> {
+                            articleContentImageRepository.save(
+                                    ArticleContentImage.of(
+                                            tempImage.getImagePath(),
+                                            article
+                                    )
+                            );
+                        }
+                );
+    }
 
-                    // DB에 존재하는 이미지 정보 삭제
-                    tempArticleContentImageRepository.delete(tempArticleContentImage);
-                });
+    public void saveArticleHashtags(
+            Set<String> hashtags,
+            Article article
+    ) {
+        hashtags.forEach(
+                hashtag -> {
+                    createHashtag(hashtag);
+                    createArticleHashtag(
+                            getHashtagEntity(hashtag),
+                            article
+                    );
+                }
+        );
+    }
+
+    private void createHashtag(
+            String hashtag
+    ) {
+        if (!hashtagRepository.existsByTitle(hashtag)) {
+            hashtagRepository.save(
+                    Hashtag.of(hashtag)
+            );
+        }
+    }
+
+    private void createArticleHashtag(
+            Hashtag hashtag,
+            Article article
+    ) {
+        articleHashtagRepository.save(
+                ArticleHashtag.of(
+                        hashtag,
+                        article
+                )
+        );
+    }
+
+    private Hashtag getHashtagEntity(
+            String hashtag
+    ) {
+        return hashtagRepository.findByTitle(hashtag)
+                .orElseThrow(() -> new ResourceNotFoundException(HASHTAG_NOT_FOUND));
     }
 }
