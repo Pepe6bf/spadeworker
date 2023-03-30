@@ -38,4 +38,38 @@ public class Article
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    private Article(
+            String title,
+            String content,
+            String thumbnailImagePath,
+            ArticleStatus status,
+            Project project,
+            User user
+    ) {
+        this.title = title;
+        this.content = content;
+        this.thumbnailImagePath = thumbnailImagePath;
+        this.status = status;
+        this.project = project;
+        this.user = user;
+    }
+
+    public static Article of(
+            String title,
+            String content,
+            String thumbnailImagePath,
+            ArticleStatus status,
+            Project project,
+            User user
+    ) {
+        return new Article(
+                title,
+                content,
+                thumbnailImagePath,
+                status,
+                project,
+                user
+        );
+    }
 }
