@@ -19,4 +19,16 @@ public class Hashtag
 
     @Column(nullable = false, unique = true)
     private String title;
+
+    private Hashtag(
+            String title
+    ) {
+        this.title = title;
+    }
+
+    public static Hashtag of(
+            String title
+    ) {
+        return new Hashtag(title);
+    }
 }
