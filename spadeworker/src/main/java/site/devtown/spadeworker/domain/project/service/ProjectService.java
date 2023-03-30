@@ -212,4 +212,13 @@ public class ProjectService {
             throw new DuplicateProjectTitleException();
     }
 
+    /**
+     * 프로젝트 Entity 조회
+     */
+    public Project getProjectEntity(
+            Long projectId
+    ) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException(PROJECT_NOT_FOUND));
+    }
 }
