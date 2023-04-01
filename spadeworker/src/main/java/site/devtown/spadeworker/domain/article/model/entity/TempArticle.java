@@ -3,6 +3,7 @@ package site.devtown.spadeworker.domain.article.model.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.devtown.spadeworker.domain.article.model.constant.TempArticleType;
 import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.global.config.audit.BaseEntity;
 
@@ -24,25 +25,44 @@ public class TempArticle
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 100, nullable = false)
+    private TempArticleType articleType;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Article article;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    private TempArticle(
+    public TempArticle(
             String title,
             String content,
+            TempArticleType articleType,
+            Article article,
             User user
     ) {
         this.title = title;
         this.content = content;
+        this.articleType = articleType;
+        this.article = article;
         this.user = user;
     }
 
     public static TempArticle of(
             String title,
             String content,
+            TempArticleType articleType,
+            Article article,
             User user
     ) {
-        return new TempArticle(title, content, user);
+        return new TempArticle(
+                title,
+                content,
+                articleType,
+                article,
+                user
+        );
     }
 
     /**
