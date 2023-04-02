@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum ArticleStatus {
-    OPEN("open"), HIDE("hide"), DELETED("deleted");
+    OPEN("open"),
+    HIDE("hide"),
+    TEMP("temp"),
+    DELETED("deleted");
 
     private final String value;
 
