@@ -4,24 +4,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import site.devtown.spadeworker.domain.article.dto.CreateArticleRequest;
-import site.devtown.spadeworker.domain.article.dto.CreateArticleResponse;
-import site.devtown.spadeworker.domain.article.model.entity.*;
-import site.devtown.spadeworker.domain.article.repository.*;
-import site.devtown.spadeworker.domain.file.dto.UploadSingleImageResponse;
-import site.devtown.spadeworker.domain.file.service.AmazonS3ImageService;
+import site.devtown.spadeworker.domain.article.dto.ArticleIdResponse;
+import site.devtown.spadeworker.domain.article.dto.SaveTempArticleRequest;
+import site.devtown.spadeworker.domain.article.dto.TempArticleDto;
+import site.devtown.spadeworker.domain.article.model.entity.Article;
+import site.devtown.spadeworker.domain.article.repository.ArticleRepository;
 import site.devtown.spadeworker.domain.project.service.ProjectService;
+import site.devtown.spadeworker.domain.user.model.entity.User;
 import site.devtown.spadeworker.domain.user.service.UserService;
+import site.devtown.spadeworker.global.exception.InvalidResourceOwnerException;
 import site.devtown.spadeworker.global.exception.ResourceNotFoundException;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
-import static site.devtown.spadeworker.domain.article.exception.ArticleExceptionCode.HASHTAG_NOT_FOUND;
-import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICLE_CONTENT_IMAGE;
-import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICLE_THUMBNAIL_IMAGE;
+import static site.devtown.spadeworker.domain.article.exception.ArticleExceptionCode.*;
+import static site.devtown.spadeworker.domain.article.model.constant.ArticleStatus.TEMP;
 
 @RequiredArgsConstructor
 @Transactional
@@ -29,178 +28,119 @@ import static site.devtown.spadeworker.domain.file.constant.ImageFileType.ARTICL
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final ArticleContentImageRepository articleContentImageRepository;
-    private final HashtagRepository hashtagRepository;
-    private final ArticleHashtagRepository articleHashtagRepository;
     private final UserService userService;
-    private final AmazonS3ImageService amazonS3ImageService;
     private final ProjectService projectService;
-    private final TempArticleService tempArticleService;
+    private final ArticleImageService articleImageService;
+    private final HashtagService hashtagService;
 
-    @Value("${image.article-thumbnail-image.default-image-path}")
-    private String defaultArticleThumbnailImagePath;
-
-    /**
-     * 게시글 컨텐츠 이미지 업로드 비즈니스 로직
-     */
-    public UploadSingleImageResponse saveArticleContentImage(
-            Long tempArticleId,
-            MultipartFile requestImage
-    ) throws IOException {
-
-        // S3 에 게시글 본문 이미지 업로드
-        String storedImageFullPath = amazonS3ImageService.uploadImage(
-                ARTICLE_CONTENT_IMAGE,
-                requestImage
-        );
-
-        tempArticleService.saveTempArticleContentImage(
-                storedImageFullPath,
-                tempArticleId
-        );
-
-        return UploadSingleImageResponse.of(
-                requestImage.getOriginalFilename(),
-                storedImageFullPath
-        );
-    }
+    @Value("${image.article-thumbnail-image.default-image-full-path}")
+    private String defaultArticleThumbnailImageFullPath;
 
     /**
-     * 게시글 썸네일 이미지 업로드 비즈니스 로직
+     * 게시글 생성 - 임시 저장
      */
-    public UploadSingleImageResponse uploadArticleThumbnailImage(
-            Long tempArticleId,
-            MultipartFile requestImage
-    ) throws IOException {
-
-        TempArticle tempArticle = tempArticleService.getTempArticleEntity(tempArticleId);
-
-        tempArticleService.deleteTempArticleThumbnailImageWithS3(tempArticle.getId());
-
-        // S3 에 게시글 본문 이미지 업로드
-        String storedImageFullPath = amazonS3ImageService.uploadImage(
-                ARTICLE_THUMBNAIL_IMAGE,
-                requestImage
-        );
-
-        tempArticleService.saveTempArticleThumbnailImage(storedImageFullPath, tempArticle);
-
-        return UploadSingleImageResponse.of(
-                requestImage.getOriginalFilename(),
-                storedImageFullPath
-        );
-    }
-
-    /**
-     * 게시글 생성 비즈니스 로직
-     */
-    public CreateArticleResponse createArticle(
-            Long tempArticleId,
-            CreateArticleRequest request
+    public ArticleIdResponse saveTempArticle(
+            Long projectId,
+            Optional<Long> articleId,
+            SaveTempArticleRequest request
     ) {
 
-        TempArticle tempArticle = tempArticleService.getTempArticleEntity(tempArticleId);
-        // Article Entity 생성
-        Article article = articleRepository.save(
-                Article.of(
-                        request.title(),
-                        request.content(),
-                        getArticleThumbnailImagePath(tempArticle),
-                        request.status(),
-                        projectService.getProjectEntity(request.projectId()),
-                        userService.getCurrentAuthorizedUser()
-                )
-        );
+        Article article;
 
-        saveTempArticleContentImageToArticleContentImage(
-                tempArticle,
-                article
-        );
+        // articleId가 요청에 없을 경우 게시글 임시 저장을 처음 하는 것으로 판단
+        if (articleId.isEmpty()) {
+            article = articleRepository.save(
+                    Article.of(
+                            request.title(),
+                            request.content(),
+                            defaultArticleThumbnailImageFullPath,
+                            TEMP,
+                            projectService.getProjectEntity(projectId),
+                            userService.getCurrentAuthorizedUser()
+                    )
+            );
+            // 기존에 임시 저장된 게시글이 존재할 경우
+        } else {
+            article = getArticleEntity(articleId.get());
 
-        saveArticleHashtags(
+            validateArticleOwner(article.getUser());
+
+            article.update(
+                    request.title(),
+                    request.content()
+            );
+        }
+
+        hashtagService.updateArticleHashtags(
                 request.hashtags(),
                 article
         );
 
-        // 임시 게시글 및 관련 정보 제거
-        tempArticleService.clearTempArticle(tempArticle);
-
-        return CreateArticleResponse.of(
-                article.getId()
-        );
+        return ArticleIdResponse.of(article.getId());
     }
 
-    // 게시글 썸네일 이미지 설정
-    private String getArticleThumbnailImagePath(
-            TempArticle tempArticle
+    /**
+     * 임시 저장 게시글 조회 - 단건 조회
+     */
+    public TempArticleDto getTempArticle(
+            Long articleId
     ) {
-        Optional<TempArticleThumbnailImage> tempArticleThumbnailImage
-                = tempArticleService.getTempArticleThumbnailImage(tempArticle);
 
-        return (tempArticleThumbnailImage.isPresent()) ?
-                tempArticleThumbnailImage.get().getImagePath() :
-                defaultArticleThumbnailImagePath;
-    }
-
-    // 임시 게시글 본문 이미지를 모두 본 게시글로 이동
-    public void saveTempArticleContentImageToArticleContentImage(
-            TempArticle tempArticle,
-            Article article
-    ) {
-        tempArticleService.getTempArticleContentImages(tempArticle)
-                .forEach(
-                        tempImage -> {
-                            articleContentImageRepository.save(
-                                    ArticleContentImage.of(
-                                            tempImage.getImagePath(),
-                                            article
-                                    )
-                            );
-                        }
-                );
-    }
-
-    public void saveArticleHashtags(
-            Set<String> hashtags,
-            Article article
-    ) {
-        hashtags.forEach(
-                hashtag -> {
-                    createHashtag(hashtag);
-                    createArticleHashtag(
-                            getHashtagEntity(hashtag),
-                            article
-                    );
-                }
-        );
-    }
-
-    private void createHashtag(
-            String hashtag
-    ) {
-        if (!hashtagRepository.existsByTitle(hashtag)) {
-            hashtagRepository.save(
-                    Hashtag.of(hashtag)
-            );
-        }
-    }
-
-    private void createArticleHashtag(
-            Hashtag hashtag,
-            Article article
-    ) {
-        articleHashtagRepository.save(
-                ArticleHashtag.of(
-                        hashtag,
-                        article
+        return articleRepository.findByIdAndStatus(articleId, TEMP)
+                .map(article -> TempArticleDto.from(
+                                article,
+                                hashtagService.getAllArticleHashtags(article)
+                        )
                 )
-        );
+                .orElseThrow(() -> new ResourceNotFoundException(TEMP_ARTICLE_NOT_FOUND));
     }
 
-    private Hashtag getHashtagEntity(
-            String hashtag
+    /**
+     * 임시 저장 게시글 조회 - 전체 조회
+     */
+    public List<TempArticleDto> getTempArticles() {
+        return articleRepository.findByUserAndStatus(
+                        userService.getCurrentAuthorizedUser(),
+                        TEMP
+                )
+                .stream()
+                .map(article -> TempArticleDto.from(
+                        article,
+                        hashtagService.getAllArticleHashtags(article)
+                ))
+                .toList();
+    }
+
+    /**
+     * 임시 게시글 삭제
+     */
+    public void deleteTempArticle(
+            Long articleId
     ) {
-        return hashtagRepository.findByTitle(hashtag)
-                .orElseThrow(() -> new ResourceNotFoundException(HASHTAG_NOT_FOUND));
+
+        Article article = getArticleEntity(articleId);
+
+        validateArticleOwner(article.getUser());
+
+        articleImageService.deleteArticleContentImages(article);
+        hashtagService.deleteArticleHashtags(article);
+        articleRepository.delete(article);
+    }
+
+    /**
+     * Article Entity 조회
+     */
+    public Article getArticleEntity(
+            Long articleId
+    ) {
+        return articleRepository.findById(articleId)
+                .orElseThrow(() -> new ResourceNotFoundException(ARTICLE_NOT_FOUND));
+    }
+
+    // (임시)게시글 소유자와 현재 인가된 사용자가 동일한지 검증
+    private void validateArticleOwner(User owner) {
+        if (!Objects.equals(owner, userService.getCurrentAuthorizedUser())) {
+            throw new InvalidResourceOwnerException(INVALID_ARTICLE_OWNER);
+        }
     }
 }

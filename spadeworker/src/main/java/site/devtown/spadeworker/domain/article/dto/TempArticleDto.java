@@ -1,6 +1,6 @@
 package site.devtown.spadeworker.domain.article.dto;
 
-import site.devtown.spadeworker.domain.article.model.entity.TempArticle;
+import site.devtown.spadeworker.domain.article.model.entity.Article;
 
 import java.util.Set;
 
@@ -11,12 +11,12 @@ public record TempArticleDto(
 ) {
 
     public static TempArticleDto from(
-            TempArticle tempArticle,
+            Article article,
             Set<String> hashtags
     ) {
         return new TempArticleDto(
-                tempArticle.getTitle(),
-                tempArticle.getContent(),
+                article.getTitle(),
+                article.getContent(),
                 hashtags
         );
     }
