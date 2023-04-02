@@ -3,6 +3,7 @@ package site.devtown.spadeworker.domain.article.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import site.devtown.spadeworker.domain.article.dto.ArticleIdResponse;
+import site.devtown.spadeworker.domain.article.dto.CreateArticleRequest;
 import site.devtown.spadeworker.domain.article.dto.SaveTempArticleRequest;
 import site.devtown.spadeworker.domain.article.dto.TempArticleDto;
 import site.devtown.spadeworker.domain.article.service.ArticleImageService;
@@ -146,22 +147,24 @@ public class ArticleController {
         );
     }
 
-//    /**
-//     * 게시글 생성 API
-//     */
-//    @PostMapping()
-//    public SingleResult<ArticleIdResponse> createArticle(
-//            @RequestParam("article-id") Long articleId,
-//            @RequestBody @Valid CreateArticleRequest request
-//    ) {
-//
-//        return responseService.getSingleResult(
-//                OK.value(),
-//                "성공적으로 게시글이 생성되었습니다.",
-//                articleService.createArticle(
-//                        tempArticleId,
-//                        request
-//                )
-//        );
-//    }
+    /**
+     * 게시글 생성 API
+     */
+    @PostMapping()
+    public SingleResult<ArticleIdResponse> createArticle(
+            @PathVariable("project-id") Long projectId,
+            @RequestParam("article-id") Optional<Long> articleId,
+            @RequestBody @Valid CreateArticleRequest request
+    ) {
+
+        return responseService.getSingleResult(
+                OK.value(),
+                "성공적으로 게시글이 생성되었습니다.",
+                articleService.createArticle(
+                        projectId,
+                        articleId,
+                        request
+                )
+        );
+    }
 }

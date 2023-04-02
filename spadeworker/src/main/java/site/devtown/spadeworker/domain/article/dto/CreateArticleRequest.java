@@ -24,6 +24,6 @@ public record CreateArticleRequest(
         @NotNull(message = "게시글 상태는 필수 값입니다.")
         ArticleStatus status,
 
-        @NotNull(message = "프로젝트 선택은 필수 입니다.")
-        Long projectId
+        @NotNull(message = "썸네일 이미지가 없으면 \"\"을 입력해야 합니다.")
+        String thumbnailImagePath
 ) {}

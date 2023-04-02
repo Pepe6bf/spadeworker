@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.devtown.spadeworker.domain.article.dto.ArticleIdResponse;
+import site.devtown.spadeworker.domain.article.dto.CreateArticleRequest;
 import site.devtown.spadeworker.domain.article.dto.SaveTempArticleRequest;
 import site.devtown.spadeworker.domain.article.dto.TempArticleDto;
 import site.devtown.spadeworker.domain.article.model.entity.Article;
@@ -128,9 +129,68 @@ public class ArticleService {
     }
 
     /**
+     * 게시글 생성 - 게시글 발행
+     */
+    public ArticleIdResponse createArticle(
+            Long projectId,
+            Optional<Long> articleId,
+            CreateArticleRequest request
+    ) {
+
+        Article article;
+
+        // 임시 저장된 게시글이 존재할 경우
+        if (articleId.isPresent() && articleRepository.existsById(articleId.get())) {
+            article = getArticleEntity(articleId.get());
+
+            validateArticleOwner(article.getUser());
+
+            article.update(
+                    request.title(),
+                    request.content(),
+                    request.status(),
+                    checkArticleThumbnailImagePath(request.thumbnailImagePath())
+            );
+            // 임시 저장된 게시글이 없을 경우
+        } else {
+            article = articleRepository.save(
+                    Article.of(
+                            request.title(),
+                            request.content(),
+                            checkArticleThumbnailImagePath(request.thumbnailImagePath()),
+                            request.status(),
+                            projectService.getProjectEntity(projectId),
+                            userService.getCurrentAuthorizedUser()
+                    )
+            );
+        }
+
+        hashtagService.updateArticleHashtags(
+                request.hashtags(),
+                article
+        );
+
+        return ArticleIdResponse.of(
+                article.getId()
+        );
+    }
+
+    // 게시글 썸네일 이미지 체크
+    private String checkArticleThumbnailImagePath(
+            String thumbnailImagePath
+    ) {
+        // 썸네일 이미지 주소가 공백으로 왔다면
+        if (thumbnailImagePath.strip().length() == 0) {
+            return defaultArticleThumbnailImageFullPath;
+        }
+
+        return thumbnailImagePath;
+    }
+
+    /**
      * Article Entity 조회
      */
-    public Article getArticleEntity(
+    private Article getArticleEntity(
             Long articleId
     ) {
         return articleRepository.findById(articleId)
