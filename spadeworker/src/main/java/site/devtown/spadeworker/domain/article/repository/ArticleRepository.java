@@ -14,4 +14,6 @@ public interface ArticleRepository
     Optional<Article> findByIdAndStatus(Long id, ArticleStatus status);
 
     List<Article> findByUserAndStatus(User user, ArticleStatus status);
+
+    boolean existsById(Long articleId);
 }
