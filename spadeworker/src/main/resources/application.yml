@@ -71,4 +71,4 @@ image:
     default-image-name:
     default-image-path:
   article-thumbnail-image:
-    default-image-path:
+    default-image-full-path:
