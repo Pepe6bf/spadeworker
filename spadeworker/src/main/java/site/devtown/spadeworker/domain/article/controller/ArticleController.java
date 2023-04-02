@@ -2,9 +2,11 @@ package site.devtown.spadeworker.domain.article.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import site.devtown.spadeworker.domain.article.dto.*;
+import site.devtown.spadeworker.domain.article.dto.ArticleIdResponse;
+import site.devtown.spadeworker.domain.article.dto.SaveTempArticleRequest;
+import site.devtown.spadeworker.domain.article.dto.TempArticleDto;
+import site.devtown.spadeworker.domain.article.service.ArticleImageService;
 import site.devtown.spadeworker.domain.article.service.ArticleService;
-import site.devtown.spadeworker.domain.article.service.TempArticleService;
 import site.devtown.spadeworker.domain.file.dto.UploadSingleImageRequest;
 import site.devtown.spadeworker.domain.file.dto.UploadSingleImageResponse;
 import site.devtown.spadeworker.domain.file.validation.ContentImageValidate;
@@ -20,48 +22,30 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.OK;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/articles")
+@RequestMapping("/api/projects/{project-id}/articles")
 @RestController
 public class ArticleController {
 
-    private final TempArticleService tempArticleService;
     private final ArticleService articleService;
+    private final ArticleImageService articleImageService;
     private final ResponseService responseService;
 
     /**
      * 임시 게시글 저장 API
      */
     @PutMapping("/temp-articles")
-    public SingleResult<SaveTempArticleResponse> createTempArticle(
-            @RequestParam("temp-article-id") Optional<Long> tempArticleId,
+    public SingleResult<ArticleIdResponse> saveTempArticle(
+            @PathVariable("project-id") Long projectId,
+            @RequestParam("article-id") Optional<Long> articleId,
             @RequestBody @Valid SaveTempArticleRequest request
     ) {
-
         return responseService.getSingleResult(
                 OK.value(),
-                "성공적으로 임시 게시글이 저장되었습니다.",
-                tempArticleService.saveTempArticle(
-                        tempArticleId,
+                "성공적으로 게시글이 임시 저장되었습니다.",
+                articleService.saveTempArticle(
+                        projectId,
+                        articleId,
                         request
-                )
-        );
-    }
-
-    /**
-     * 게시글 본문 이미지 업로드 API
-     */
-    @PostMapping("/article-content-images")
-    public SingleResult<UploadSingleImageResponse> saveArticleContentImage(
-            @RequestParam("temp-article-id") Long tempArticleId,
-            @ModelAttribute @Valid @ContentImageValidate UploadSingleImageRequest request
-    ) throws Exception {
-
-        return responseService.getSingleResult(
-                OK.value(),
-                "게시글 컨텐츠 이미지가 성공적으로 업로드 되었습니다.",
-                articleService.saveArticleContentImage(
-                        tempArticleId,
-                        request.image()
                 )
         );
     }
@@ -75,34 +59,34 @@ public class ArticleController {
         return responseService.getListResult(
                 OK.value(),
                 "성공적으로 임시 게시글이 조회되었습니다.",
-                tempArticleService.getTempArticles()
+                articleService.getTempArticles()
         );
     }
 
     /**
      * 임시 게시글 단건 조회 API
      */
-    @GetMapping("/temp-articles/{temp-article-id}")
+    @GetMapping("/temp-articles/{article-id}")
     public SingleResult<TempArticleDto> getTempArticle(
-            @PathVariable("temp-article-id") Long tempArticleId
+            @PathVariable("article-id") Long articleId
     ) {
 
         return responseService.getSingleResult(
                 OK.value(),
                 "성공적으로 임시 게시글이 조회되었습니다.",
-                tempArticleService.getTempArticle(tempArticleId)
+                articleService.getTempArticle(articleId)
         );
     }
 
     /**
      * 임시 게시글 삭제 API
      */
-    @DeleteMapping("/temp-articles/{temp-article-id}")
+    @DeleteMapping("/temp-articles/{article-id}")
     public CommonResult deleteTempArticle(
-            @PathVariable("temp-article-id") Long tempArticleId
+            @PathVariable("article-id") Long articleId
     ) {
 
-        tempArticleService.deleteTempArticle(tempArticleId);
+        articleService.deleteTempArticle(articleId);
 
         return responseService.getSuccessResult(
                 OK.value(),
@@ -111,19 +95,36 @@ public class ArticleController {
     }
 
     /**
+     * 게시글 본문 이미지 업로드 API
+     */
+    @PostMapping("/article-content-images")
+    public SingleResult<UploadSingleImageResponse> saveArticleContentImage(
+            @RequestParam("article-id") Long articleId,
+            @ModelAttribute @Valid @ContentImageValidate UploadSingleImageRequest request
+    ) throws IOException {
+        return responseService.getSingleResult(
+                OK.value(),
+                "게시글 컨텐츠 이미지가 성공적으로 업로드 되었습니다.",
+                articleImageService.saveArticleContentImage(
+                        articleId,
+                        request.image()
+                )
+        );
+    }
+
+    /**
      * 게시글 썸네일 이미지 업로드 API
      */
     @PutMapping("/article-thumbnail-images")
     public SingleResult<UploadSingleImageResponse> saveArticleThumbnailImage(
-            @RequestParam("temp-article-id") Long tempArticleId,
+            @RequestParam("article-id") Long articleId,
             @ModelAttribute @Valid @ContentImageValidate UploadSingleImageRequest request
     ) throws IOException {
-
         return responseService.getSingleResult(
                 OK.value(),
                 "성공적으로 게시글 썸네일이 업로드 되었습니다.",
-                articleService.uploadArticleThumbnailImage(
-                        tempArticleId,
+                articleImageService.uploadArticleThumbnailImage(
+                        articleId,
                         request.image()
                 )
         );
@@ -134,10 +135,10 @@ public class ArticleController {
      */
     @DeleteMapping("/article-thumbnail-images")
     public CommonResult deleteArticleThumbnailImage(
-            @RequestParam("temp-article-id") Long tempArticleId
+            @RequestParam("image-path") String imagePath
     ) {
 
-        tempArticleService.deleteTempArticleThumbnailImageWithS3(tempArticleId);
+        articleImageService.deleteArticleThumbnailImage(imagePath);
 
         return responseService.getSuccessResult(
                 OK.value(),
@@ -145,22 +146,22 @@ public class ArticleController {
         );
     }
 
-    /**
-     * 게시글 생성 API
-     */
-    @PostMapping()
-    public SingleResult<CreateArticleResponse> createArticle(
-            @RequestParam("temp-article-id") Long tempArticleId,
-            @RequestBody @Valid CreateArticleRequest request
-    ) {
-
-        return responseService.getSingleResult(
-                OK.value(),
-                "성공적으로 게시글이 생성되었습니다.",
-                articleService.createArticle(
-                        tempArticleId,
-                        request
-                )
-        );
-    }
+//    /**
+//     * 게시글 생성 API
+//     */
+//    @PostMapping()
+//    public SingleResult<ArticleIdResponse> createArticle(
+//            @RequestParam("article-id") Long articleId,
+//            @RequestBody @Valid CreateArticleRequest request
+//    ) {
+//
+//        return responseService.getSingleResult(
+//                OK.value(),
+//                "성공적으로 게시글이 생성되었습니다.",
+//                articleService.createArticle(
+//                        tempArticleId,
+//                        request
+//                )
+//        );
+//    }
 }
