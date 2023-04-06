@@ -17,7 +17,8 @@ public enum ProjectExceptionCode
     PROJECT_DUPLICATE_LIKE(BAD_REQUEST, "PJ-C-003", "프로젝트에 이미 해당 사용자의 좋아요가 존재합니다."),
     PROJECT_LIKE_NOT_FOUND(NOT_FOUND, "PJ-C-004", "프로젝트에 해당 사용자의 좋아요가 존재하지 않습니다."),
     PROJECT_DUPLICATE_SUBSCRIBE(BAD_REQUEST, "PJ-C-005", "이미 해당 프로젝트에 구독중입니다."),
-    PROJECT_SUBSCRIBE_NOT_FOUND(NOT_FOUND, "PJ-C-006", "해당 프로젝트에 구독중이지 않습니다.");
+    PROJECT_SUBSCRIBE_NOT_FOUND(NOT_FOUND, "PJ-C-006", "해당 프로젝트에 구독중이지 않습니다."),
+    DUPLICATE_PROJECT_TITLE(BAD_REQUEST, "PJ-C-007", "이미 사용중인 프로젝트 제목입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

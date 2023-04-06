@@ -3,7 +3,7 @@ server:
 
 spring:
   profiles:
-    default: test
+    default: dev
 
   datasource:
     url:
@@ -47,10 +47,28 @@ spring:
           userInfoUri:
           userNameAttribute:
 
+# S3
+cloud:
+  aws:
+    credentials:
+      access-key:
+      secret-key:
+    s3:
+      bucket:
+    region:
+      static:
+    stack:
+      auto:
+
+# Image File Rule & Info
 image:
-  local-image-storage-location:
   allow-extensions:
+  limit-size:
+  user-profile-image:
+    default-image-name:
+    default-image-path:
   project-thumbnail-image:
     default-image-name:
-    default-image-uri:
-    limit-size:
+    default-image-path:
+  article-thumbnail-image:
+    default-image-full-path:

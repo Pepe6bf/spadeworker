@@ -9,6 +9,18 @@ import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "user_role",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "user-role-unique",
+                        columnNames = {
+                                "role_id",
+                                "user_id"
+                        }
+                )
+        }
+)
 @Entity
 public class UserRole extends BaseTimeEntity {
     @Id

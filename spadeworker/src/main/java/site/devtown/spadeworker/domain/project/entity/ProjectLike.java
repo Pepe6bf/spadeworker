@@ -10,6 +10,18 @@ import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "project_like",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "project-like-unique",
+                        columnNames = {
+                                "project_id",
+                                "user_id"
+                        }
+                )
+        }
+)
 @Entity
 public class ProjectLike extends BaseTimeEntity {
 

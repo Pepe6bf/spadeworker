@@ -69,4 +69,18 @@ public class ProjectExceptionHandler {
                 HttpStatus.valueOf(PROJECT_SUBSCRIBE_NOT_FOUND.getHttpStatus().value())
         );
     }
+
+    /**
+     * DuplicateProjectTitleException 핸들링
+     */
+    @ExceptionHandler(DuplicateProjectTitleException.class)
+    public ResponseEntity<ExceptionResponse> handleDuplicateProjectTitleException(
+            DuplicateProjectTitleException e
+    ) {
+        log.error("{}", e.getMessage());
+        return new ResponseEntity<>(
+                ExceptionResponse.of(DUPLICATE_PROJECT_TITLE, DUPLICATE_PROJECT_TITLE.getMessage()),
+                HttpStatus.valueOf(DUPLICATE_PROJECT_TITLE.getHttpStatus().value())
+        );
+    }
 }

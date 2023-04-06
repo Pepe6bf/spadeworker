@@ -42,7 +42,7 @@ public record ProjectDto(
             return new UserInfo(
                     user.getId(),
                     user.getNickname(),
-                    user.getProfileImageUri()
+                    user.getProfileImagePath()
             );
         }
     }

@@ -3,17 +3,14 @@ package site.devtown.spadeworker.domain.project.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.devtown.spadeworker.domain.file.service.ImageFileService;
+import site.devtown.spadeworker.domain.file.service.AmazonS3ImageService;
 import site.devtown.spadeworker.domain.project.dto.CreateProjectRequest;
 import site.devtown.spadeworker.domain.project.dto.ProjectDto;
 import site.devtown.spadeworker.domain.project.dto.UpdateProjectRequest;
 import site.devtown.spadeworker.domain.project.entity.Project;
 import site.devtown.spadeworker.domain.project.entity.ProjectLike;
 import site.devtown.spadeworker.domain.project.entity.ProjectSubscribe;
-import site.devtown.spadeworker.domain.project.exception.ProjectDuplicateLikeException;
-import site.devtown.spadeworker.domain.project.exception.ProjectDuplicateSubscribeException;
-import site.devtown.spadeworker.domain.project.exception.ProjectLikeNotFoundException;
-import site.devtown.spadeworker.domain.project.exception.ProjectSubscribeNotFoundException;
+import site.devtown.spadeworker.domain.project.exception.*;
 import site.devtown.spadeworker.domain.project.repository.ProjectLikeRepository;
 import site.devtown.spadeworker.domain.project.repository.ProjectRepository;
 import site.devtown.spadeworker.domain.project.repository.ProjectSubscribeRepository;
@@ -36,7 +33,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectLikeRepository projectLikeRepository;
     private final ProjectSubscribeRepository projectSubscribeRepository;
-    private final ImageFileService imageFileService;
+    private final AmazonS3ImageService amazonS3ImageService;
     private final UserService userService;
 
     /**
@@ -79,10 +76,12 @@ public class ProjectService {
             CreateProjectRequest request
     ) throws Exception {
 
+        duplicateProjectTitleValidate(request.title());
+
         Project project = Project.of(
                 request.title(),
                 request.description(),
-                imageFileService.saveImage(
+                amazonS3ImageService.saveThumbnailImage(
                         PROJECT_THUMBNAIL_IMAGE,
                         request.thumbnailImage()
                 ),
@@ -109,11 +108,14 @@ public class ProjectService {
         // 현재 인증된 사용자의 리소스가 맞는지 검증
         validateProjectOwner(savedProject.getUser());
 
+        if (!request.title().equals(savedProject.getTitle()))
+            duplicateProjectTitleValidate(request.title());
+
         // update 로직 진행
         savedProject.update(
                 request.title(),
                 request.description(),
-                imageFileService.updateImage(
+                amazonS3ImageService.updateThumbnailImage(
                         PROJECT_THUMBNAIL_IMAGE,
                         request.thumbnailImage(),
                         savedProject.getThumbnailImageUri()
@@ -203,5 +205,20 @@ public class ProjectService {
         if (!Objects.equals(owner, userService.getCurrentAuthorizedUser())) {
             throw new InvalidResourceOwnerException(INVALID_PROJECT_OWNER);
         }
+    }
+
+    private void duplicateProjectTitleValidate(String projectTitle) {
+        if (projectRepository.existsByTitle(projectTitle))
+            throw new DuplicateProjectTitleException();
+    }
+
+    /**
+     * 프로젝트 Entity 조회
+     */
+    public Project getProjectEntity(
+            Long projectId
+    ) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException(PROJECT_NOT_FOUND));
     }
 }
